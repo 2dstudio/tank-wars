@@ -5,6 +5,15 @@
  *  Author: IEUser
  */ 
 
+#define MOVE_UP_BIT 3
+#define MOVE_DOWN_BIT 1
+#define MOVE_LEFT_BIT 0
+#define MOVE_RIGHT_BIT 2
+#define ROTATE_LEFT_BIT 5
+#define ROTATE_RIGHT_BIT 6
+
+#define TANK_MOVE_RATE 5
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -106,12 +115,12 @@ int main(void)
 int MIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
-	unsigned char up = GetBit(us_pina, 3);
-	unsigned char bottom = GetBit(us_pina, 1);
-	unsigned char left = GetBit(us_pina, 0);
-	unsigned char right = GetBit(us_pina, 2);
+	unsigned char up = GetBit(us_pina, MOVE_UP_BIT);
+	unsigned char bottom = GetBit(us_pina, MOVE_DOWN_BIT);
+	unsigned char left = GetBit(us_pina, MOVE_LEFT_BIT);
+	unsigned char right = GetBit(us_pina, MOVE_RIGHT_BIT);
 	
-	unsigned char move_rate = 5;
+	unsigned char move_rate = TANK_MOVE_RATE;
 	
 	int d_x = 0;
 	int d_y = 0;
@@ -142,7 +151,7 @@ int MIC_tick(int state){
 int LRIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
-	unsigned char rotate_left = GetBit(us_pina, 5);
+	unsigned char rotate_left = GetBit(us_pina, ROTATE_LEFT_BIT);
 	
 	switch(state){
 		case LRIC_Start:
@@ -166,7 +175,7 @@ int LRIC_tick(int state){
 int RRIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
-	unsigned char rotate_right = GetBit(us_pina, 6);
+	unsigned char rotate_right = GetBit(us_pina, ROTATE_RIGHT_BIT);
 	
 	switch(state){	
 		case RRIC_Start:
