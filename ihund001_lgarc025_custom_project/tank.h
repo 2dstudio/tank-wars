@@ -17,7 +17,7 @@ typedef struct _tank {
 } tank;
 
 void colorTank(tank t, unsigned int color);
-void moveTankAndDisplay(tank * t, int d_x, int d_y);
+int isValidMovement(tank *t, int d_x, int d_y);
 
 int tankMoved(tank * t_old, tank * t){
 	if((t_old->x != t->x) || (t_old->y != t->y)){
@@ -31,41 +31,47 @@ int tankMoved(tank * t_old, tank * t){
 	return 0;
 }
 
-void moveTankInternal(tank * t, int d_x, int d_y){
+void moveTankInternal(tank * t, int d_x, int d_y, char left, char right){
 	t->x += d_x;
 	t->y += d_y;
+	
+	if(left){
+		if(t->direction == 'N')
+		t->direction = 'E';
+		else if (t->direction == 'E')
+		t->direction = 'S';
+		else if(t->direction == 'S')
+		t->direction = 'W';
+		else if(t->direction == 'W')
+		t->direction = 'N';
+	}
+	
+	if(right){
+		if(t->direction == 'N')
+		t->direction = 'W';
+		else if (t->direction == 'W')
+		t->direction = 'S';
+		else if(t->direction == 'S')
+		t->direction = 'E';
+		else if(t->direction == 'E')
+		t->direction = 'N';
+	}	
 }
 
-void rotateTankRight(tank * t){
-	if(t->direction == 'N')
-		t->direction = 'E';
-	else if (t->direction == 'E')
-		t->direction = 'S';
-	else if(t->direction == 'S')
-		t->direction = 'W';
-	else if(t->direction == 'W')
-		t->direction = 'N';
-}
-
-void rotateTankLeft(tank * t){
-	if(t->direction == 'N')
-		t->direction = 'W';
-	else if (t->direction == 'W')
-		t->direction = 'S';
-	else if(t->direction == 'S')
-		t->direction = 'E';
-	else if(t->direction == 'E')
-		t->direction = 'N';
+void moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
+	moveTankInternal(t, d_x, d_y, left, right);
 }
 
 void moveTank(tank * t, int d_x, int d_y){
-	//FIXME - Here check first if movement is valid.
-	moveTankInternal(t, d_x, d_y);
+	moveTankIfValid(t, d_x, d_y, 0, 0);
 }
 
-void moveTankAndDisplay(tank * t, int d_x, int d_y){
-	//FIXME - Here check first if movement is valid.
-	moveTankInternal(t, d_x, d_y);	
+void rotateTankRight(tank * t){
+	moveTankIfValid(t, 0, 0, 0, 1);
+}
+
+void rotateTankLeft(tank * t){
+	moveTankIfValid(t, 0, 0, 1, 0);
 }
 
 void initTank(tank * t, int x, int y, char direction){
