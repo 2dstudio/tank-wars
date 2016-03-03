@@ -6,9 +6,9 @@
 #define CANNON_WIDTH 7
 #define CANNON_LENGTH 15
 
-#define SCREEN_X_MAX 300
+#define SCREEN_X_MAX 320
 #define SCREEN_X_MIN 0
-#define SCREEN_Y_MAX 300
+#define SCREEN_Y_MAX 480
 #define SCREEN_Y_MIN 0
 
 typedef struct _tank {
