@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "ihund001_lgarc025_custom_project", "ihund001_lgarc025_custom_project\ihund001_lgarc025_custom_project.cproj", "{D40900DC-BF6C-483C-96D5-7E560A724C88}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D40900DC-BF6C-483C-96D5-7E560A724C88}.Debug|AVR.ActiveCfg = Debug|AVR
+		{D40900DC-BF6C-483C-96D5-7E560A724C88}.Debug|AVR.Build.0 = Debug|AVR
+		{D40900DC-BF6C-483C-96D5-7E560A724C88}.Release|AVR.ActiveCfg = Release|AVR
+		{D40900DC-BF6C-483C-96D5-7E560A724C88}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

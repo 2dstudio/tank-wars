@@ -1,0 +1,209 @@
+/*
+ * ihund001_lgarc025_custom_project.c
+ *
+ * Created: 2/29/2016 10:49:57 PM
+ *  Author: IEUser
+ */ 
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+#include "lib\HX8357_1284.h"
+#include "tank.h"
+#include "timer.h"
+#include "task.h"
+#include "utilities.h"
+#include "queue.h"
+
+task tasks[4];
+const unsigned short numTasks = 4;
+
+enum Display_Handler_States{DH_Start, DH_Process};
+int DH_tick(int state);
+
+enum Left_Rotation_Input_Controller_States{LRIC_Start, LRIC_Wait, LRIC_Hold};
+int LRIC_tick(int state);
+
+enum Right_Rotation_Input_Controller_States{RRIC_Start, RRIC_Wait, RRIC_Hold};
+int RRIC_tick(int state);
+
+enum Movement_Input_Controller_States{MIC_Start, MIC_Process};
+int MIC_tick(int state);
+
+tank t1;
+//tank t2;
+//tank t3;
+//tank t4;
+
+tank t1_old;
+//tank t2_old;
+//tank t3_old;
+//tank t4_old;
+
+Q4uc rotate_queue;
+
+int main(void)
+{
+	DDRA = 0x00; PORTA = 0xFF;
+	DDRC = 0xFF; PORTC = 0x00;
+	
+	unsigned int display_refresh_rate = 20;
+	unsigned int input_rate = 40;
+	unsigned long TimePeriodGCD = 20;
+	
+	//Q4ucInit(&rotate_queue);
+	
+	unsigned char i = 0;
+	tasks[i].state = MIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &MIC_tick;
+	++i;
+	tasks[i].state = LRIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &LRIC_tick;
+	++i;
+	tasks[i].state = RRIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &RRIC_tick;
+	++i;
+	tasks[i].state = DH_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &DH_tick;
+	
+	
+	TimerFlag = 0;
+	TimerSet(TimePeriodGCD);
+	TimerOn();
+	
+	SPI_MasterInit();
+	displayInit();
+	fillScreen(0xFFFF);
+	
+	initTank(&t1, 100, 100, 'N');
+	t1_old = t1;
+	
+	printTank(t1);
+	
+	while(1)
+	{	
+		t1_old = t1;
+		for ( unsigned char i = 0; i < numTasks; i++ ) {
+			if ( tasks[i].elapsedTime >= tasks[i].period ) {
+				tasks[i].state = tasks[i].TickFct(tasks[i].state);
+				tasks[i].elapsedTime = 0;
+			}
+			tasks[i].elapsedTime += TimePeriodGCD;
+		}
+		while(!TimerFlag);
+		TimerFlag = 0;	
+	}
+}
+
+int MIC_tick(int state){
+	
+	unsigned char us_pina = ~PINA;
+	unsigned char up = GetBit(us_pina, 3);
+	unsigned char bottom = GetBit(us_pina, 1);
+	unsigned char left = GetBit(us_pina, 0);
+	unsigned char right = GetBit(us_pina, 2);
+	
+	unsigned char move_rate = 5;
+	
+	int d_x = 0;
+	int d_y = 0;
+	
+	switch(state){
+		case MIC_Start:
+			state = MIC_Process;
+			break;
+	}
+	
+	switch(state){
+		case MIC_Process:
+			if(up)
+				d_y += move_rate;
+			if(bottom)
+				d_y -= move_rate;
+			if(left)
+				d_x += move_rate;
+			if(right)
+				d_x -= move_rate;
+			moveTank(&t1, d_x, d_y);
+			break;
+	}
+
+	return state;
+}
+
+int LRIC_tick(int state){
+	
+	unsigned char us_pina = ~PINA;
+	unsigned char rotate_left = GetBit(us_pina, 5);
+	
+	switch(state){
+		case LRIC_Start:
+			state = LRIC_Wait;
+			break;
+		case LRIC_Wait:
+			if(rotate_left){
+				rotateTankLeft(&t1);
+				state = LRIC_Hold;
+			}
+			break;
+		case LRIC_Hold:
+			if(!rotate_left){
+				state = LRIC_Wait;
+			}
+			break;
+	}
+	return state;
+}
+
+int RRIC_tick(int state){
+	
+	unsigned char us_pina = ~PINA;
+	unsigned char rotate_right = GetBit(us_pina, 6);
+	
+	switch(state){	
+		case RRIC_Start:
+			state = RRIC_Wait;
+			break;
+		case RRIC_Wait:
+			PORTC = 0x00;
+			if(rotate_right){
+				rotateTankRight(&t1);
+				state = RRIC_Hold;
+			}
+			break;
+		case RRIC_Hold:
+			if(!rotate_right){
+				state = RRIC_Wait;
+			}
+			break;
+	}
+	return state;
+}
+
+int DH_tick(int state){
+	
+	switch(state){ //Transitions
+		case DH_Start:
+			state = DH_Process;
+			break;
+	}
+	
+	switch(state){// Actions
+		case DH_Process:
+			if(tankMoved(& t1_old, & t1)){
+				clearTank(t1_old);
+				printTank(t1);
+			}
+			break;
+	}
+	
+	return state;
+}
