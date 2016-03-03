@@ -173,7 +173,6 @@ int RRIC_tick(int state){
 			state = RRIC_Wait;
 			break;
 		case RRIC_Wait:
-			PORTC = 0x00;
 			if(rotate_right){
 				rotateTankRight(&t1);
 				state = RRIC_Hold;

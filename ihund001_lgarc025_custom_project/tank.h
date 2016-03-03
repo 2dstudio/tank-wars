@@ -7,8 +7,8 @@
 #define CANNON_LENGTH 15
 
 typedef struct _tank {
-	unsigned long x;
-	unsigned long y;
+	int x;
+	int y;
 	unsigned int tank_length;
 	unsigned int tank_width;
 	unsigned int cannon_length;
@@ -17,7 +17,7 @@ typedef struct _tank {
 } tank;
 
 void colorTank(tank t, unsigned int color);
-int isValidMovement(tank *t, int d_x, int d_y);
+int inBounds(tank *t);
 
 int tankMoved(tank * t_old, tank * t){
 	if((t_old->x != t->x) || (t_old->y != t->y)){
@@ -58,8 +58,27 @@ void moveTankInternal(tank * t, int d_x, int d_y, char left, char right){
 	}	
 }
 
+void getNewTankPosition(tank * t_new, tank * t, int d_x, int d_y, char left, char right){
+	*t_new = *t;
+	moveTankInternal(t_new, d_x, d_y, left, right);
+}
+
+int inBounds(tank * t){
+	if(t->x < 0){
+		return 0;
+	}
+	if(t->y < 0){
+		return 0;
+	}
+	return 1;
+}
+
 void moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
-	moveTankInternal(t, d_x, d_y, left, right);
+	tank t_new;
+	getNewTankPosition(&t_new, t, d_x, d_y, left, right);
+	if(inBounds(&t_new)){
+		*t = t_new;
+	}
 }
 
 void moveTank(tank * t, int d_x, int d_y){
