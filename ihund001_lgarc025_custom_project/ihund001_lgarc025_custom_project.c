@@ -5,6 +5,15 @@
  *  Author: IEUser
  */ 
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+#include "lib\HX8357_1284.h"
+#include "tank.h"
+#include "timer.h"
+#include "task.h"
+#include "utilities.h"
+
 #define NUM_TASKS 5
 
 #define MOVE_UP_BIT 3
@@ -20,16 +29,6 @@
 #define TANK_MOVE_RATE 5
 
 #define BULLET_QUEUE_SIZE 10
-
-#include <avr/io.h>
-#include <avr/interrupt.h>
-
-#include "lib\HX8357_1284.h"
-#include "tank.h"
-#include "timer.h"
-#include "task.h"
-#include "utilities.h"
-#include "lib\queue.h"
 
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
@@ -53,7 +52,7 @@ tank t1;
 
 tank t1_old;
 
-Queue bullet_queue;
+shot short_arr[4];
 
 int main(void)
 {
@@ -167,7 +166,7 @@ int SIC_tick(int state){
 			break;
 		case SIC_Wait:
 			if(shoot){
-				//Make shot here
+				//makeShot(&t1);
 				state = SIC_Hold;
 			}
 			break;

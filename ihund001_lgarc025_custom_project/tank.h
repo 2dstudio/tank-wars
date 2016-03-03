@@ -6,10 +6,18 @@
 #define CANNON_WIDTH 7
 #define CANNON_LENGTH 15
 
+#define SHOT_SPEED 10
+#define SHOT_HEIGHT 5
+#define SHOT_WIDTH 5
+
 #define SCREEN_X_MAX 320
 #define SCREEN_X_MIN 0
 #define SCREEN_Y_MAX 480
 #define SCREEN_Y_MIN 0
+
+void colorTank(tank t, unsigned int color);
+int inBounds(tank *t);
+void getCannonHead(tank * t, int * cannon_x, int * cannon_y);
 
 typedef struct _tank {
 	int x;
@@ -21,8 +29,23 @@ typedef struct _tank {
 	char direction;
 } tank;
 
-void colorTank(tank t, unsigned int color);
-int inBounds(tank *t);
+typedef struct shot {
+	int x;
+	int y;
+	int height;
+	int width;
+	unsigned int speed;
+	char direction;
+} shot;
+
+void initShot(shot & s, int x, int y, unsigned int speed, char direction){
+	s->x = x;
+	s->y = y;
+	s->height = SHOT_HEIGHT;
+	s->width = SHOT_WIDTH;
+	s->speed = speed;
+	s->direction = direction;
+}
 
 int tankMoved(tank * t_old, tank * t){
 	if((t_old->x != t->x) || (t_old->y != t->y)){
@@ -130,6 +153,19 @@ void rotateTankRight(tank * t){
 
 void rotateTankLeft(tank * t){
 	moveTankIfValid(t, 0, 0, 1, 0);
+}
+
+void makeShot(tank * t){
+	int cannon_x, cannon_y;
+	getCannonHead(t, cannon_x, cannon_y);
+	// Get Cannon Head;
+	// Create shot
+	// init shot at cannon heads pos
+	// Put shot in the arr
+}
+
+void getCannonHead(tank * t, int * cannon_x, int * cannon_y){
+	// Return cannon's head here
 }
 
 void initTank(tank * t, int x, int y, char direction){
