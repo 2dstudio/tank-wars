@@ -5,14 +5,21 @@
  *  Author: IEUser
  */ 
 
+#define NUM_TASKS 5
+
 #define MOVE_UP_BIT 3
 #define MOVE_DOWN_BIT 1
 #define MOVE_LEFT_BIT 0
 #define MOVE_RIGHT_BIT 2
-#define ROTATE_LEFT_BIT 5
-#define ROTATE_RIGHT_BIT 6
+
+#define ROTATE_LEFT_BIT 4
+#define ROTATE_RIGHT_BIT 5
+
+#define SHOT_BIT 6
 
 #define TANK_MOVE_RATE 5
+
+#define BULLET_QUEUE_SIZE 10
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -22,10 +29,10 @@
 #include "timer.h"
 #include "task.h"
 #include "utilities.h"
-#include "queue.h"
+#include "lib\queue.h"
 
-task tasks[4];
-const unsigned short numTasks = 4;
+task tasks[NUM_TASKS];
+const unsigned short numTasks = NUM_TASKS;
 
 enum Display_Handler_States{DH_Start, DH_Process};
 int DH_tick(int state);
@@ -36,20 +43,17 @@ int LRIC_tick(int state);
 enum Right_Rotation_Input_Controller_States{RRIC_Start, RRIC_Wait, RRIC_Hold};
 int RRIC_tick(int state);
 
+enum Shot_Input_Controller_States{SIC_Start, SIC_Wait, SIC_Hold};
+int SIC_tick(int state);
+
 enum Movement_Input_Controller_States{MIC_Start, MIC_Process};
 int MIC_tick(int state);
 
 tank t1;
-//tank t2;
-//tank t3;
-//tank t4;
 
 tank t1_old;
-//tank t2_old;
-//tank t3_old;
-//tank t4_old;
 
-Q4uc rotate_queue;
+Queue bullet_queue;
 
 int main(void)
 {
@@ -60,13 +64,18 @@ int main(void)
 	unsigned int input_rate = 40;
 	unsigned long TimePeriodGCD = 20;
 	
-	//Q4ucInit(&rotate_queue);
+	bullet_queue = QueueInit(BULLET_QUEUE_SIZE);
 	
 	unsigned char i = 0;
 	tasks[i].state = MIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &MIC_tick;
+	++i;
+	tasks[i].state = SIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &SIC_tick;
 	++i;
 	tasks[i].state = LRIC_Start;
 	tasks[i].period = input_rate;
@@ -120,7 +129,7 @@ int MIC_tick(int state){
 	unsigned char left = GetBit(us_pina, MOVE_LEFT_BIT);
 	unsigned char right = GetBit(us_pina, MOVE_RIGHT_BIT);
 	
-	unsigned char move_rate = TANK_MOVE_RATE;
+	unsigned char tank_move_rate = TANK_MOVE_RATE;
 	
 	int d_x = 0;
 	int d_y = 0;
@@ -134,17 +143,40 @@ int MIC_tick(int state){
 	switch(state){
 		case MIC_Process:
 			if(up)
-				d_y += move_rate;
+				d_y += tank_move_rate;
 			if(bottom)
-				d_y -= move_rate;
+				d_y -= tank_move_rate;
 			if(left)
-				d_x += move_rate;
+				d_x += tank_move_rate;
 			if(right)
-				d_x -= move_rate;
+				d_x -= tank_move_rate;
 			moveTank(&t1, d_x, d_y);
 			break;
 	}
 
+	return state;
+}
+
+int SIC_tick(int state){
+	unsigned char us_pina = ~PINA;
+	unsigned char shoot = GetBit(us_pina, SHOT_BIT);
+	
+	switch(state){
+		case SIC_Start:
+			state = SIC_Wait;
+			break;
+		case SIC_Wait:
+			if(shoot){
+				//Make shot here
+				state = SIC_Hold;
+			}
+			break;
+		case SIC_Hold:
+			if(!shoot){
+				state = SIC_Wait;
+			}
+			break;
+	}
 	return state;
 }
 
