@@ -6,6 +6,11 @@
 #define CANNON_WIDTH 7
 #define CANNON_LENGTH 15
 
+#define SCREEN_X_MAX 300
+#define SCREEN_X_MIN 0
+#define SCREEN_Y_MAX 300
+#define SCREEN_Y_MIN 0
+
 typedef struct _tank {
 	int x;
 	int y;
@@ -66,31 +71,44 @@ void getNewTankPosition(tank * t_new, tank * t, int d_x, int d_y, char left, cha
 int inBounds(tank * t){
 	int lower_x = 0;
 	int lower_y = 0; 
+	int upper_x = 0;
+	int upper_y = 0;
 	
 	if(t->direction == 'N'){
 		lower_x = t->x;
 		lower_y = t->y;
+		
+		upper_x = t->x + t->tank_width;
+		upper_y = t->y + t->tank_length + t->cannon_length;
 	}
 	else if(t->direction == 'E'){
 		lower_x = t->x - t->cannon_length;
 		lower_y = t->y;
+		
+		upper_x = t->x + t->tank_length;
+		upper_y = t->y + t->tank_width;
 	}
 	else if(t->direction == 'S'){
 		lower_x = t->x;
 		lower_y = t->y - t->cannon_length;
+		
+		upper_x = t->x + t->tank_width;
+		upper_y = t->y + t->tank_length;
 	}
 	else if(t->direction == 'W'){
 		lower_x = t->x;
 		lower_y = t->y;
+		
+		upper_x = t->x + t->tank_length + t->cannon_length;
+		upper_y = t->y + t->tank_width;
 	}
 	
-	if(lower_x < 0){
+	if(lower_x <SCREEN_X_MIN || upper_x > SCREEN_X_MAX|| lower_y < SCREEN_Y_MIN || upper_y > SCREEN_Y_MAX){
 		return 0;
 	}
-	if(lower_y < 0){
-		return 0;
+	else{
+		return 1;
 	}
-	return 1;
 }
 
 void moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
