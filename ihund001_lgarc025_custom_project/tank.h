@@ -64,10 +64,30 @@ void getNewTankPosition(tank * t_new, tank * t, int d_x, int d_y, char left, cha
 }
 
 int inBounds(tank * t){
-	if(t->x < 0){
+	int lower_x = 0;
+	int lower_y = 0; 
+	
+	if(t->direction == 'N'){
+		lower_x = t->x;
+		lower_y = t->y;
+	}
+	else if(t->direction == 'E'){
+		lower_x = t->x - t->cannon_length;
+		lower_y = t->y;
+	}
+	else if(t->direction == 'S'){
+		lower_x = t->x;
+		lower_y = t->y - t->cannon_length;
+	}
+	else if(t->direction == 'W'){
+		lower_x = t->x;
+		lower_y = t->y;
+	}
+	
+	if(lower_x < 0){
 		return 0;
 	}
-	if(t->y < 0){
+	if(lower_y < 0){
 		return 0;
 	}
 	return 1;
