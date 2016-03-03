@@ -68,40 +68,41 @@ void getNewTankPosition(tank * t_new, tank * t, int d_x, int d_y, char left, cha
 	moveTankInternal(t_new, d_x, d_y, left, right);
 }
 
-int inBounds(tank * t){
-	int lower_x = 0;
-	int lower_y = 0; 
-	int upper_x = 0;
-	int upper_y = 0;
-	
+void getEffectiveTankWindow(tank *t, int *lower_x, int *lower_y, int *upper_x, int *upper_y){
 	if(t->direction == 'N'){
-		lower_x = t->x;
-		lower_y = t->y;
+		*lower_x = t->x;
+		*lower_y = t->y;
 		
-		upper_x = t->x + t->tank_width;
-		upper_y = t->y + t->tank_length + t->cannon_length;
+		*upper_x = t->x + t->tank_width;
+		*upper_y = t->y + t->tank_length + t->cannon_length;
 	}
 	else if(t->direction == 'E'){
-		lower_x = t->x - t->cannon_length;
-		lower_y = t->y;
+		*lower_x = t->x - t->cannon_length;
+		*lower_y = t->y;
 		
-		upper_x = t->x + t->tank_length;
-		upper_y = t->y + t->tank_width;
+		*upper_x = t->x + t->tank_length;
+		*upper_y = t->y + t->tank_width;
 	}
 	else if(t->direction == 'S'){
-		lower_x = t->x;
-		lower_y = t->y - t->cannon_length;
+		*lower_x = t->x;
+		*lower_y = t->y - t->cannon_length;
 		
-		upper_x = t->x + t->tank_width;
-		upper_y = t->y + t->tank_length;
+		*upper_x = t->x + t->tank_width;
+		*upper_y = t->y + t->tank_length;
 	}
 	else if(t->direction == 'W'){
-		lower_x = t->x;
-		lower_y = t->y;
+		*lower_x = t->x;
+		*lower_y = t->y;
 		
-		upper_x = t->x + t->tank_length + t->cannon_length;
-		upper_y = t->y + t->tank_width;
+		*upper_x = t->x + t->tank_length + t->cannon_length;
+		*upper_y = t->y + t->tank_width;
 	}
+}
+
+int inBounds(tank * t){
+	int lower_x = 0, lower_y = 0, upper_x = 0, upper_y = 0;
+	
+	getEffectiveTankWindow(t, &lower_x, &lower_y, &upper_x, &upper_y);
 	
 	if(lower_x <SCREEN_X_MIN || upper_x > SCREEN_X_MAX|| lower_y < SCREEN_Y_MIN || upper_y > SCREEN_Y_MAX){
 		return 0;
