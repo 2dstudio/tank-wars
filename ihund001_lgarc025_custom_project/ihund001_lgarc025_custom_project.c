@@ -15,7 +15,7 @@
 #include "task.h"
 #include "utilities.h"
 
-#define NUM_TASKS 5
+#define NUM_TASKS 6
 
 #define MOVE_UP_BIT 3
 #define MOVE_DOWN_BIT 1
@@ -36,6 +36,9 @@ const unsigned short numTasks = NUM_TASKS;
 
 enum Display_Handler_States{DH_Start, DH_Process};
 int DH_tick(int state);
+
+enum Shot_Movement_Controller_States{SMC_Start, SMC_Process};
+int SMC_tick(int state);
 
 enum Left_Rotation_Input_Controller_States{LRIC_Start, LRIC_Wait, LRIC_Hold};
 int LRIC_tick(int state);
@@ -87,6 +90,11 @@ int main(void)
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &RRIC_tick;
+	++i;
+	tasks[i].state = SMC_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &SMC_tick;
 	++i;
 	tasks[i].state = DH_Start;
 	tasks[i].period = display_refresh_rate;
@@ -175,7 +183,6 @@ int SIC_tick(int state){
 		case SIC_Hold:
 			if(!shoot){
 				state = SIC_Wait;
-				PORTC = 0x00;
 			}
 			break;
 	}
@@ -227,6 +234,22 @@ int RRIC_tick(int state){
 			}
 			break;
 	}
+	return state;
+}
+
+int SMC_tick(int state){
+	switch(state){
+		case SMC_Start:
+			state = SMC_Process;
+			break;
+	}
+	
+	switch(state){
+		case SMC_Process:
+			moveAllShots(shots_arr);
+			break;
+	}
+	
 	return state;
 }
 

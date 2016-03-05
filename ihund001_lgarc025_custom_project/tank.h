@@ -7,8 +7,8 @@
 #define MACRO_CANNON_LENGTH 15
 
 #define MACRO_SHOT_SPEED 10
-#define MACRO_SHOT_HEIGHT 5
-#define MACRO_SHOT_WIDTH 5
+#define MACRO_SHOT_HEIGHT 7
+#define MACRO_SHOT_WIDTH 7
 
 #define SCREEN_X_MAX 320
 #define SCREEN_X_MIN 0
@@ -164,33 +164,6 @@ void rotateTankLeft(tank * t){
 	moveTankIfValid(t, 0, 0, 1, 0);
 }
 
-void makeShot(tank * t, shot * shots_arr[4]){
-	PORTC = 0xFF;
-	shot * s = createShot(t);
-	shots_arr[0] = s;
-}
-
-void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
-	
-	unsigned int cannon_offset =  ( t->tank_width - t->cannon_width )/2;
-	
-	if(t->direction == 'N'){
-		*cannon_x = t->x + cannon_offset;
-		*cannon_y = t->y + t->tank_length + t->cannon_length;
-	} else{
-		*cannon_x=200;
-		*cannon_y=100;
-	}
-	
-	 /*else if (t->direction == 'E'){
-		
-	} else if (t->direction == 'S'){
-		
-	} else if (t->direction == 'W'){
-		
-	}*/
-}
-
 void initTank(tank * t, int x, int y, char direction){
 	t->x = x;
 	t->y = y;
@@ -234,5 +207,58 @@ void colorTank(tank t, unsigned int color){
 		drawRect(t.x, t.y, t.tank_length, t.tank_width, color);
 		drawRect(t.x + t.tank_length, t.y + cannon_offset, t.cannon_length, t.cannon_width, color);
 	}
+}
+
+void moveSingleShot(shot * s){
+	s->y += s->speed;
+}
+
+void colorShot(const shot * s, unsigned int color){
+	drawRect(s->x, s->y, s->shot_width, s->shot_height, color);
+}
+
+void clearShot(shot * s){
+	colorShot(s, 0xffff);
+}
+
+void printShot(shot * s){
+	colorShot(s, 0);
+}
+
+void moveAllShots(shot * shots_arr[4]){
+	PORTC = 0x01;
+	for (int i=0; i<4; ++i){
+		if(shots_arr[i]!=0){
+			clearShot(shots_arr[i]);
+			moveSingleShot(shots_arr[i]);
+			printShot(shots_arr[i]);
+		}
+	}
+}
+
+void makeShot(tank * t, shot * shots_arr[4]){
+	shot * s = createShot(t);
+	shots_arr[0] = s;
+}
+
+void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
+	
+	unsigned int cannon_offset =  ( t->tank_width - t->cannon_width )/2;
+	
+	if(t->direction == 'N'){
+		*cannon_x = t->x + cannon_offset;
+		*cannon_y = t->y + t->tank_length + t->cannon_length;
+	} else{
+		*cannon_x=200;
+		*cannon_y=100;
+	}
+	
+	 /*else if (t->direction == 'E'){
+		
+	} else if (t->direction == 'S'){
+		
+	} else if (t->direction == 'W'){
+		
+	}*/
 }
 #endif
