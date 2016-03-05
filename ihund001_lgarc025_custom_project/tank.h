@@ -36,7 +36,7 @@ typedef struct shot {
 } shot;
 
 void colorTank(tank t, unsigned int color);
-int inBounds(tank *t);
+int tankInBounds(tank *t);
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
 
 void initShot(shot * s, int x, int y, char direction, int shot_height, int shot_width, unsigned int speed){
@@ -131,11 +131,7 @@ void getEffectiveTankWindow(tank *t, int *lower_x, int *lower_y, int *upper_x, i
 	}
 }
 
-int inBounds(tank * t){
-	int lower_x = 0, lower_y = 0, upper_x = 0, upper_y = 0;
-	
-	getEffectiveTankWindow(t, &lower_x, &lower_y, &upper_x, &upper_y);
-	
+int windowInBounds(int lower_x ,int lower_y, int upper_x, int upper_y){
 	if(lower_x <SCREEN_X_MIN || upper_x > SCREEN_X_MAX|| lower_y < SCREEN_Y_MIN || upper_y > SCREEN_Y_MAX){
 		return 0;
 	}
@@ -144,10 +140,18 @@ int inBounds(tank * t){
 	}
 }
 
+int tankInBounds(tank * t){
+	int lower_x = 0, lower_y = 0, upper_x = 0, upper_y = 0;
+	
+	getEffectiveTankWindow(t, &lower_x, &lower_y, &upper_x, &upper_y);
+	
+	return windowInBounds(lower_x, lower_y, upper_x, upper_y);
+}
+
 void moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
 	tank t_new;
 	getNewTankPosition(&t_new, t, d_x, d_y, left, right);
-	if(inBounds(&t_new)){
+	if(tankInBounds(&t_new)){
 		*t = t_new;
 	}
 }
