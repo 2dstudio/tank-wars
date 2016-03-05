@@ -56,7 +56,7 @@ tank t1;
 
 tank t1_old;
 
-shot* shots_arr[4];
+shot* shots_arr[MAX_CONCURRENT_SHOTS];
 
 int main(void)
 {

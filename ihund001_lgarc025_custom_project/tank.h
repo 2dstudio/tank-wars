@@ -15,6 +15,7 @@
 #define SCREEN_Y_MAX 480
 #define SCREEN_Y_MIN 0
 
+#define MAX_CONCURRENT_SHOTS 4
 
 typedef struct _tank {
 	int x;
@@ -243,23 +244,27 @@ void printShot(shot * s){
 	colorShot(s, 0);
 }
 
-void moveAllShots(shot * shots_arr[4]){
-	PORTC = 0x01;
-	for (int i=0; i<4; ++i){
+void moveAllShots(shot * shots_arr[]){
+	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
 		if(shots_arr[i]!=0){
 			clearShot(shots_arr[i]);
 			if(moveSingleShot(shots_arr[i]))
 				printShot(shots_arr[i]);
 			else{
-				shots_arr[i]=0;
+				shots_arr[i] = NULL;
 			}
 		}
 	}
 }
 
-void makeShot(tank * t, shot * shots_arr[4]){
+void makeShot(tank * t, shot * shots_arr[]){
 	shot * s = createShot(t);
-	shots_arr[0] = s;
+	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
+		if(shots_arr[i] == NULL){
+			shots_arr[i] = s;
+			break;
+		}
+	}
 }
 
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
