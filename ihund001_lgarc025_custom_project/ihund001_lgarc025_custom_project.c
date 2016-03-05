@@ -7,6 +7,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <string.h>
 
 #include "lib\HX8357_1284.h"
 #include "tank.h"
@@ -52,7 +53,7 @@ tank t1;
 
 tank t1_old;
 
-shot short_arr[4];
+shot* shots_arr[4];
 
 int main(void)
 {
@@ -63,6 +64,7 @@ int main(void)
 	unsigned int input_rate = 40;
 	unsigned long TimePeriodGCD = 20;
 	
+	memset(shots_arr, 0, 4* sizeof(shot *));
 	//bullet_queue = QueueInit(BULLET_QUEUE_SIZE);
 	
 	unsigned char i = 0;
@@ -166,13 +168,14 @@ int SIC_tick(int state){
 			break;
 		case SIC_Wait:
 			if(shoot){
-				//makeShot(&t1);
+				makeShot(&t1, shots_arr);
 				state = SIC_Hold;
 			}
 			break;
 		case SIC_Hold:
 			if(!shoot){
 				state = SIC_Wait;
+				PORTC = 0x00;
 			}
 			break;
 	}

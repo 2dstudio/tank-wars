@@ -37,15 +37,23 @@ typedef struct shot {
 
 void colorTank(tank t, unsigned int color);
 int inBounds(tank *t);
-void getCannonHead(tank * t, int * cannon_x, int * cannon_y);
+void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
 
-void initShot(shot * s, int x, int y, int shot_height, int shot_width, unsigned int speed, char direction){
+void initShot(shot * s, int x, int y, char direction, int shot_height, int shot_width, unsigned int speed){
 	s->x = x;
 	s->y = y;
 	s->shot_height = shot_height;
 	s->shot_width = shot_width;
 	s->speed = speed;
 	s->direction = direction;
+}
+
+shot * createShot(tank * t){
+	int cannon_x, cannon_y;
+	getCannonHead(t, &cannon_x, &cannon_y);
+	shot * s = malloc(sizeof(struct shot));
+	initShot(s, cannon_x, cannon_y, t->direction, MACRO_SHOT_HEIGHT, MACRO_SHOT_WIDTH, MACRO_SHOT_SPEED);
+	return s;
 }
 
 int tankMoved(tank * t_old, tank * t){
@@ -156,17 +164,31 @@ void rotateTankLeft(tank * t){
 	moveTankIfValid(t, 0, 0, 1, 0);
 }
 
-void makeShot(tank * t){
-	int cannon_x, cannon_y;
-	getCannonHead(t, &cannon_x, &cannon_y);
-	// Get Cannon Head;
-	// Create shot
-	// init shot at cannon heads pos
-	// Put shot in the arr
+void makeShot(tank * t, shot * shots_arr[4]){
+	PORTC = 0xFF;
+	shot * s = createShot(t);
+	shots_arr[0] = s;
 }
 
-void getCannonHead(tank * t, int * cannon_x, int * cannon_y){
-	// Return cannon's head here
+void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
+	
+	unsigned int cannon_offset =  ( t->tank_width - t->cannon_width )/2;
+	
+	if(t->direction == 'N'){
+		*cannon_x = t->x + cannon_offset;
+		*cannon_y = t->y + t->tank_length + t->cannon_length;
+	} else{
+		*cannon_x=200;
+		*cannon_y=100;
+	}
+	
+	 /*else if (t->direction == 'E'){
+		
+	} else if (t->direction == 'S'){
+		
+	} else if (t->direction == 'W'){
+		
+	}*/
 }
 
 void initTank(tank * t, int x, int y, char direction){
