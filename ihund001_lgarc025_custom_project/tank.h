@@ -244,6 +244,10 @@ void printShot(shot * s){
 	colorShot(s, 0);
 }
 
+void deleteShot(shot * s){
+	free(s);
+}
+
 void moveAllShots(shot * shots_arr[]){
 	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
 		if(shots_arr[i]!=0){
@@ -251,6 +255,7 @@ void moveAllShots(shot * shots_arr[]){
 			if(moveSingleShot(shots_arr[i]))
 				printShot(shots_arr[i]);
 			else{
+				deleteShot(shots_arr[i]);
 				shots_arr[i] = NULL;
 			}
 		}
@@ -262,9 +267,10 @@ void makeShot(tank * t, shot * shots_arr[]){
 	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
 		if(shots_arr[i] == NULL){
 			shots_arr[i] = s;
-			break;
+			return;
 		}
 	}
+	deleteShot(s);
 }
 
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
