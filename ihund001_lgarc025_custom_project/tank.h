@@ -1,23 +1,20 @@
 #ifndef TANK_H
 #define TANK_H
 
-#define TANK_LENGTH 35
-#define TANK_WIDTH 35
-#define CANNON_WIDTH 7
-#define CANNON_LENGTH 15
+#define MACRO_TANK_LENGTH 35
+#define MACRO_TANK_WIDTH 35
+#define MACRO_CANNON_WIDTH 7
+#define MACRO_CANNON_LENGTH 15
 
-#define SHOT_SPEED 10
-#define SHOT_HEIGHT 5
-#define SHOT_WIDTH 5
+#define MACRO_SHOT_SPEED 10
+#define MACRO_SHOT_HEIGHT 5
+#define MACRO_SHOT_WIDTH 5
 
 #define SCREEN_X_MAX 320
 #define SCREEN_X_MIN 0
 #define SCREEN_Y_MAX 480
 #define SCREEN_Y_MIN 0
 
-void colorTank(tank t, unsigned int color);
-int inBounds(tank *t);
-void getCannonHead(tank * t, int * cannon_x, int * cannon_y);
 
 typedef struct _tank {
 	int x;
@@ -32,17 +29,21 @@ typedef struct _tank {
 typedef struct shot {
 	int x;
 	int y;
-	int height;
-	int width;
+	int shot_height;
+	int shot_width;
 	unsigned int speed;
 	char direction;
 } shot;
 
-void initShot(shot & s, int x, int y, unsigned int speed, char direction){
+void colorTank(tank t, unsigned int color);
+int inBounds(tank *t);
+void getCannonHead(tank * t, int * cannon_x, int * cannon_y);
+
+void initShot(shot * s, int x, int y, int shot_height, int shot_width, unsigned int speed, char direction){
 	s->x = x;
 	s->y = y;
-	s->height = SHOT_HEIGHT;
-	s->width = SHOT_WIDTH;
+	s->shot_height = shot_height;
+	s->shot_width = shot_width;
 	s->speed = speed;
 	s->direction = direction;
 }
@@ -157,7 +158,7 @@ void rotateTankLeft(tank * t){
 
 void makeShot(tank * t){
 	int cannon_x, cannon_y;
-	getCannonHead(t, cannon_x, cannon_y);
+	getCannonHead(t, &cannon_x, &cannon_y);
 	// Get Cannon Head;
 	// Create shot
 	// init shot at cannon heads pos
@@ -171,10 +172,10 @@ void getCannonHead(tank * t, int * cannon_x, int * cannon_y){
 void initTank(tank * t, int x, int y, char direction){
 	t->x = x;
 	t->y = y;
-	t->tank_length = TANK_LENGTH;
-	t->tank_width = TANK_WIDTH;
-	t->cannon_length = CANNON_LENGTH;
-	t->cannon_width = CANNON_WIDTH;
+	t->tank_length = MACRO_TANK_LENGTH;
+	t->tank_width = MACRO_TANK_WIDTH;
+	t->cannon_length = MACRO_CANNON_LENGTH;
+	t->cannon_width = MACRO_CANNON_WIDTH;
 	t->direction = direction;
 }
 

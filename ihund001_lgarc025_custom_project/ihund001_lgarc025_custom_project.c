@@ -63,7 +63,7 @@ int main(void)
 	unsigned int input_rate = 40;
 	unsigned long TimePeriodGCD = 20;
 	
-	bullet_queue = QueueInit(BULLET_QUEUE_SIZE);
+	//bullet_queue = QueueInit(BULLET_QUEUE_SIZE);
 	
 	unsigned char i = 0;
 	tasks[i].state = MIC_Start;
