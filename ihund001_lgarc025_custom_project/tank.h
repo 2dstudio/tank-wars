@@ -213,8 +213,22 @@ void colorTank(tank t, unsigned int color){
 	}
 }
 
-void moveSingleShot(shot * s){
+int shotInBounds(shot *s){
+	int lower_x = s->x, lower_y = s->y, upper_x = s->x + s->shot_width, upper_y = s->y + s->shot_height;
+	
+	return windowInBounds(lower_x, lower_y, upper_x, upper_y);
+}
+
+int moveSingleShot(shot * s){
+	// Code to move shot here
 	s->y += s->speed;
+	
+	// Bound Checking
+	if(!shotInBounds(s))
+		return 0;
+		
+	// Hit Checking
+	return 1;
 }
 
 void colorShot(const shot * s, unsigned int color){
@@ -234,8 +248,11 @@ void moveAllShots(shot * shots_arr[4]){
 	for (int i=0; i<4; ++i){
 		if(shots_arr[i]!=0){
 			clearShot(shots_arr[i]);
-			moveSingleShot(shots_arr[i]);
-			printShot(shots_arr[i]);
+			if(moveSingleShot(shots_arr[i]))
+				printShot(shots_arr[i]);
+			else{
+				shots_arr[i]=0;
+			}
 		}
 	}
 }
