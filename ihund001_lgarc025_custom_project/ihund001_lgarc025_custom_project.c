@@ -34,9 +34,6 @@
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
-enum Display_Handler_States{DH_Start, DH_Process};
-int DH_tick(int state);
-
 enum Shot_Movement_Controller_States{SMC_Start, SMC_Process};
 int SMC_tick(int state);
 
@@ -55,9 +52,6 @@ int MIC_tick(int state);
 tank t1;
 tank t2;
 
-tank t1_old;
-tank t2_old;
-
 shot* shots_arr[MAX_CONCURRENT_SHOTS];
 
 int main(void)
@@ -70,7 +64,6 @@ int main(void)
 	unsigned long TimePeriodGCD = 20;
 	
 	memset(shots_arr, 0, 4* sizeof(shot *));
-	//bullet_queue = QueueInit(BULLET_QUEUE_SIZE);
 	
 	unsigned char i = 0;
 	tasks[i].state = MIC_Start;
@@ -97,12 +90,6 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &SMC_tick;
-	/*++i;
-	tasks[i].state = DH_Start;
-	tasks[i].period = display_refresh_rate;
-	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &DH_tick;*/
-	
 	
 	TimerFlag = 0;
 	TimerSet(TimePeriodGCD);
@@ -120,8 +107,6 @@ int main(void)
 	
 	while(1)
 	{	
-		t2_old = t2;
-		t1_old = t1;
 		for ( unsigned char i = 0; i < numTasks; i++ ) {
 			if ( tasks[i].elapsedTime >= tasks[i].period ) {
 				tasks[i].state = tasks[i].TickFct(tasks[i].state);
@@ -252,30 +237,6 @@ int SMC_tick(int state){
 	switch(state){
 		case SMC_Process:
 			moveAllShots(shots_arr);
-			break;
-	}
-	
-	return state;
-}
-
-int DH_tick(int state){
-	
-	switch(state){ //Transitions
-		case DH_Start:
-			state = DH_Process;
-			break;
-	}
-	
-	switch(state){// Actions
-		case DH_Process:
-			/*if(tankMoved(& t1_old, & t1)){
-				clearTank(t1_old);
-				printTank(t1);
-			}
-			if(tankMoved(& t2_old, & t2)){
-				clearTank(t2_old);
-				printTank(t2);
-			}*/
 			break;
 	}
 	
