@@ -53,8 +53,10 @@ enum Movement_Input_Controller_States{MIC_Start, MIC_Process};
 int MIC_tick(int state);
 
 tank t1;
+tank t2;
 
 tank t1_old;
+tank t2_old;
 
 shot* shots_arr[MAX_CONCURRENT_SHOTS];
 
@@ -110,13 +112,15 @@ int main(void)
 	displayInit();
 	fillScreen(0xFFFF);
 	
-	initTank(&t1, 100, 100, 'N');
-	t1_old = t1;
+	initTank(&t1, 100, 50, 'N');
+	initTank(&t2, 100, 400, 'S');
 	
 	printTank(t1);
+	printTank(t2);
 	
 	while(1)
 	{	
+		t2_old = t2;
 		t1_old = t1;
 		for ( unsigned char i = 0; i < numTasks; i++ ) {
 			if ( tasks[i].elapsedTime >= tasks[i].period ) {
@@ -266,6 +270,10 @@ int DH_tick(int state){
 			if(tankMoved(& t1_old, & t1)){
 				clearTank(t1_old);
 				printTank(t1);
+			}
+			if(tankMoved(& t2_old, & t2)){
+				clearTank(t2_old);
+				printTank(t2);
 			}
 			break;
 	}
