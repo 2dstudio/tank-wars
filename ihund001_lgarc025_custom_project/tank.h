@@ -177,7 +177,7 @@ int moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
 }
 
 void moveTank(tank * t, int d_x, int d_y, int * moved){
-	*moved = moveTankIfValid(t, d_x, d_y, 0, 0);
+	*moved |= moveTankIfValid(t, d_x, d_y, 0, 0);
 }
 
 void rotateTankRight(tank * t){
