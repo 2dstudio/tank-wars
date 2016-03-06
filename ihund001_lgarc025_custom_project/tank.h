@@ -1,14 +1,14 @@
 #ifndef TANK_H
 #define TANK_H
 
-#define MACRO_TANK_LENGTH 35
-#define MACRO_TANK_WIDTH 35
-#define MACRO_CANNON_WIDTH 7
-#define MACRO_CANNON_LENGTH 15
+#define MACRO_TANK_LENGTH 50
+#define MACRO_TANK_WIDTH 50
+#define MACRO_CANNON_WIDTH 10
+#define MACRO_CANNON_LENGTH 20
 
-#define MACRO_BULLET_SPEED 10
-#define MACRO_BULLET_HEIGHT 7
-#define MACRO_BULLET_WIDTH 7
+#define MACRO_BULLET_SPEED 9
+#define MACRO_BULLET_HEIGHT 10
+#define MACRO_BULLET_WIDTH 10
 
 #define SCREEN_X_MAX 320
 #define SCREEN_X_MIN 0
@@ -51,11 +51,11 @@ typedef struct _window {
 	int u_y;
 } window;
 
-void colorTank(tank * t, unsigned int color);
-int tankInBounds(tank *t);
+void colorTank(const tank * t, unsigned int color);
+int tankInBounds(const tank *t);
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
-void clearTank(tank * t);
-void printTank(tank * t);
+void clearTank(const tank * t);
+void printTank(const tank * t);
 
 void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
 	w->l_x = l_x;
@@ -132,12 +132,12 @@ void moveTankInternal(tank * t, int d_x, int d_y, char left, char right){
 	}	
 }
 
-void getNewTankPosition(tank * t_new, tank * t, int d_x, int d_y, char left, char right){
+void getNewTankPosition(tank * t_new, const tank * t, int d_x, int d_y, char left, char right){
 	*t_new = *t;
 	moveTankInternal(t_new, d_x, d_y, left, right);
 }
 
-void getEffectiveTankWindow(tank *t, window * w){
+void getEffectiveTankWindow(const tank *t, window * w){
 	int lower_x, lower_y, upper_x, upper_y;
 	if(t->tank_direction == 'N'){
 		lower_x = t->x;
@@ -170,6 +170,58 @@ void getEffectiveTankWindow(tank *t, window * w){
 	initWindow(w, lower_x, lower_y, upper_x, upper_y);
 }
 
+void getTankBodyWindow(const tank *t, window * body_window){
+	int lower_x, lower_y, upper_x, upper_y;
+	
+	lower_x = t->x;
+	lower_y = t->y;
+	if(t->tank_direction == 'N' || t->tank_direction == 'S'){
+		upper_x = t->x + t->tank_width;
+		upper_y = t->y + t->tank_length;
+	}
+	else{
+		upper_x = t->x + t->tank_length;
+		upper_y = t->y + t->tank_width;
+	}
+	initWindow(body_window, lower_x, lower_y, upper_x, upper_y);
+}
+
+void getTankCannonWindow(const tank *t, window * cannon_window){
+	int lower_x, lower_y, upper_x, upper_y;
+	
+	unsigned int cannon_offset =  ( t->tank_width - t->cannon_width )/2;
+	
+	if(t->tank_direction == 'N'){
+		lower_x = t->x + cannon_offset;
+		lower_y = t->y +t->tank_length;
+		
+		upper_x = t->x + cannon_offset + t->cannon_width;
+		upper_y = t->y + t->tank_length + t->cannon_length;
+	}
+	else if(t->tank_direction == 'E'){
+		lower_x = t->x - t->cannon_length;
+		lower_y = t->y + cannon_offset;
+		
+		upper_x = t->x;
+		upper_y = t->y + cannon_offset + t->cannon_width;
+	}
+	else if(t->tank_direction == 'S'){
+		lower_x = t->x + cannon_offset;
+		lower_y = t->y - t->cannon_length;
+		
+		upper_x = t->x + cannon_offset + t->cannon_width;
+		upper_y = t->y;
+	}
+	else{
+		lower_x = t->x + t->tank_length;
+		lower_y = t->y + cannon_offset;
+		
+		upper_x = t->x + t->tank_length + t->cannon_length;
+		upper_y = t->y + cannon_offset + t->cannon_width;
+	}
+	initWindow(cannon_window, lower_x, lower_y, upper_x, upper_y);
+}
+
 int windowInBounds(const window * w){
 	if(w->l_x <SCREEN_X_MIN || w->u_x > SCREEN_X_MAX|| w->l_y < SCREEN_Y_MIN || w->u_y > SCREEN_Y_MAX){
 		return 0;
@@ -179,45 +231,81 @@ int windowInBounds(const window * w){
 	}
 }
 
-int tankInBounds(tank * t){
+int tankInBounds(const tank * t){
 	window w;
 	getEffectiveTankWindow(t, &w);
-	
 	return windowInBounds(&w);
 }
 
-int moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
+int windowsCollide(const window * w1, const window * w2){
+	if (w2->u_x <= w1->l_x)
+		return 0;
+	else if (w2->l_x >= w1->u_x)
+		return 0;
+	else{
+		if(w2->u_y <= w1->l_y)
+			return 0;
+		else if(w2->l_y >= w1->u_y)
+			return 0;
+		else
+			return 1;
+	}
+}
+
+int tanksCollide(const tank *t1,const tank *t2){
+	window t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
+	getTankBodyWindow(t1, &t1_body_window);
+	getTankCannonWindow(t1, &t1_cannon_window);
+	getTankBodyWindow(t2, &t2_body_window);
+	getTankCannonWindow(t2, &t2_cannon_window);
+	
+	//Check if any combinations of windows collide
+	if(windowsCollide(&t1_body_window,&t2_body_window))
+		return 1;
+	if(windowsCollide(&t1_body_window,&t2_cannon_window))
+		return 1;
+	if(windowsCollide(&t1_cannon_window,&t2_body_window))
+		return 1;
+	if(windowsCollide(&t1_cannon_window,&t2_cannon_window))
+		return 1;
+	return 0;
+}
+
+int moveTankIfValid(tank * t1, const tank *t2, int d_x, int d_y, char left, char right){
 	tank t_new;
-	getNewTankPosition(&t_new, t, d_x, d_y, left, right);
+	getNewTankPosition(&t_new, t1, d_x, d_y, left, right);
 	if(!tankInBounds(&t_new)){
 		return 0;
 	}
-	clearTank(t);
-	*t = t_new;
+	if(tanksCollide(&t_new, t2)){
+		return 0;
+	}
+	clearTank(t1);
+	*t1 = t_new;
 	return 1;
 }
 
-int moveTank(tank * t, int d_x, int d_y){
-	return moveTankIfValid(t, d_x, d_y, 0, 0);
+int moveTank(tank * t1, const tank * t2, int d_x, int d_y){
+	return moveTankIfValid(t1, t2, d_x, d_y, 0, 0);
 }
 
-int rotateTankRight(tank * t){
-	return moveTankIfValid(t, 0, 0, 0, 1);
+int rotateTankRight(tank * t1, const tank * t2){
+	return moveTankIfValid(t1, t2, 0, 0, 0, 1);
 }
 
-int rotateTankLeft(tank * t){
-	return moveTankIfValid(t, 0, 0, 1, 0);
+int rotateTankLeft(tank * t1, const tank *t2){
+	return moveTankIfValid(t1, t2, 0, 0, 1, 0);
 }
 
-void printTank(tank * t){
+void printTank(const tank * t){
 	colorTank(t, 0);
 }
 
-void clearTank(tank * t){
+void clearTank(const tank * t){
 	colorTank(t, 0xffff);
 }
 
-void colorTank(tank * tp, unsigned int color){
+void colorTank(const tank * tp, unsigned int color){
 	tank t = *tp;
 	unsigned int cannon_offset =  ( t.tank_width - t.cannon_width )/2;
 	

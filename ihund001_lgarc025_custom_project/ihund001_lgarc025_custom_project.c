@@ -134,22 +134,22 @@ int main(void)
 	}
 }
 
-void moveTankFromInput(tank * t, int up, int down, int left, int right, int lr, int rr){
+void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int right, int lr, int rr){
 	int moved = 0;
 	if(up && !down)
-		moved |= moveTank(t, 0, TANK_MOVE_RATE);
+		moved |= moveTank(t1, t2, 0, TANK_MOVE_RATE);
 	else if(down && !up)
-		moved |= moveTank(t, 0, -TANK_MOVE_RATE);
+		moved |= moveTank(t1, t2, 0, -TANK_MOVE_RATE);
 	if(left && !right)
-		moved |= moveTank(t, TANK_MOVE_RATE, 0);
+		moved |= moveTank(t1, t2, TANK_MOVE_RATE, 0);
 	else if(right && !left)
-		moved |= moveTank(t, -TANK_MOVE_RATE, 0);
+		moved |= moveTank(t1, t2, -TANK_MOVE_RATE, 0);
 	if(lr && !rr)
-		moved |= rotateTankLeft(t);
+		moved |= rotateTankLeft(t1, t2);
 	else if(rr && !lr)
-		moved |= rotateTankRight(t);
+		moved |= rotateTankRight(t1, t2);
 	if(moved)
-		printTank(t);
+		printTank(t1);
 }
 
 int MIC_tick(int state){
@@ -274,7 +274,7 @@ int TM_tick(int state){
 	
 	switch(state){
 		case TM_Process:
-			moveTankFromInput(&t1, controls[TANK_UP], controls[TANK_DOWN], controls[TANK_LEFT], controls[TANK_RIGHT], controls[TANK_LR], controls[TANK_RR] );
+			moveTankFromInput(&t1, &t2, controls[TANK_UP], controls[TANK_DOWN], controls[TANK_LEFT], controls[TANK_RIGHT], controls[TANK_LR], controls[TANK_RR] );
 			controls[TANK_LR] = 0;
 			controls[TANK_RR] = 0;
 	}
