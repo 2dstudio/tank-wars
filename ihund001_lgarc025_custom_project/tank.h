@@ -54,6 +54,7 @@ void colorTank(tank * t, unsigned int color);
 int tankInBounds(tank *t);
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
 void clearTank(tank * t);
+void printTank(tank * t);
 
 void initShot(shot * s, int x, int y, char direction, int shot_height, int shot_width, unsigned int speed){
 	s->x = x;
@@ -181,11 +182,13 @@ void moveTank(tank * t, int d_x, int d_y, int * moved){
 }
 
 void rotateTankRight(tank * t){
-	moveTankIfValid(t, 0, 0, 0, 1);
+	if(moveTankIfValid(t, 0, 0, 0, 1))
+		printTank(t);
 }
 
 void rotateTankLeft(tank * t){
-	moveTankIfValid(t, 0, 0, 1, 0);
+	if(moveTankIfValid(t, 0, 0, 1, 0))
+		printTank(t);
 }
 
 void initTank(tank * t, int x, int y, char direction){
