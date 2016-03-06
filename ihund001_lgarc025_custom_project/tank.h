@@ -222,6 +222,16 @@ void getTankCannonWindow(const tank *t, window * cannon_window){
 	initWindow(cannon_window, lower_x, lower_y, upper_x, upper_y);
 }
 
+void getBulletWindow(const bullet *s, window * bullet_window){
+	int lower_x, lower_y, upper_x, upper_y;
+	
+	lower_x = s->x;
+	lower_y = s->y;
+	upper_x = s->x + s->bullet_width;
+	upper_y = s->y + s->bullet_height;
+	initWindow(bullet_window, lower_x, lower_y, upper_x, upper_y);
+}
+
 int windowInBounds(const window * w){
 	if(w->l_x <SCREEN_X_MIN || w->u_x > SCREEN_X_MAX|| w->l_y < SCREEN_Y_MIN || w->u_y > SCREEN_Y_MAX){
 		return 0;
@@ -340,15 +350,38 @@ int shotInBounds(bullet *s){
 	return windowInBounds(&w);
 }
 
-int moveSingleShot(bullet * s){
-	// Code to move shot here
+int shotHitTank(const bullet * s, const tank * t1, const tank * t2){
+	window bullet_window, t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
+	
+	getBulletWindow(s, &bullet_window);
+	
+	getTankBodyWindow(t1, &t1_body_window);
+	getTankCannonWindow(t1, &t1_cannon_window);
+	getTankBodyWindow(t2, &t2_body_window);
+	getTankCannonWindow(t2, &t2_cannon_window);
+	
+	// If bullet collides with a window.
+	// Take health etc
+	if(windowsCollide(&bullet_window,&t1_body_window))
+		return 1;
+	if(windowsCollide(&bullet_window,&t1_cannon_window))
+		return 1;
+	if(windowsCollide(&bullet_window,&t2_body_window))
+		return 1;
+	if(windowsCollide(&bullet_window,&t2_cannon_window))
+		return 1;
+	return 0;
+}
+
+int moveSingleShot(bullet * s, const tank * t1, const tank *t2){
 	s->y += s->bullet_speed;
 	
-	// Bound Checking
 	if(!shotInBounds(s))
 		return 0;
+	
+	if(shotHitTank(s, t1, t2))
+		return 0;
 		
-	// Hit Checking
 	return 1;
 }
 
@@ -368,11 +401,11 @@ void deleteShot(bullet * s){
 	free(s);
 }
 
-void moveAllShots(bullet * shots_arr[]){
+void moveAllShots(bullet * shots_arr[], const tank * t1, const tank *t2){
 	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
-		if(shots_arr[i]!=0){
+		if(shots_arr[i] != NULL){
 			clearShot(shots_arr[i]);
-			if(moveSingleShot(shots_arr[i]))
+			if(moveSingleShot(shots_arr[i], t1, t2))
 				printShot(shots_arr[i]);
 			else{
 				deleteShot(shots_arr[i]);

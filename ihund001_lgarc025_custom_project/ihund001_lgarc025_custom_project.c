@@ -81,11 +81,6 @@ int main(void)
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &MIC_tick;
 	++i;
-	tasks[i].state = SIC_Start;
-	tasks[i].period = input_rate;
-	tasks[i].elapsedTime = input_rate;
-	tasks[i].TickFct = &SIC_tick;
-	++i;
 	tasks[i].state = LRIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
@@ -100,6 +95,11 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &SMC_tick;
+	++i;
+	tasks[i].state = SIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &SIC_tick;
 	++i;
 	tasks[i].state = TM_Start;
 	tasks[i].period = display_refresh_rate;
@@ -258,7 +258,7 @@ int SMC_tick(int state){
 	
 	switch(state){
 		case SMC_Process:
-			moveAllShots(shots_arr);
+			moveAllShots(shots_arr, &t1, &t2);
 			break;
 	}
 	
