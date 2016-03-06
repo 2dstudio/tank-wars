@@ -27,7 +27,7 @@ typedef struct _tank {
 	char direction;
 } tank;
 
-typedef struct shot {
+typedef struct _shot {
 	int x;
 	int y;
 	int shot_height;
@@ -36,7 +36,7 @@ typedef struct shot {
 	char direction;
 } shot;
 
-typedef struct window {
+typedef struct _window {
 	int l_x;
 	int l_y;
 	int u_x;
@@ -68,7 +68,7 @@ void initShot(shot * s, int x, int y, char direction, int shot_height, int shot_
 shot * createShot(tank * t){
 	int cannon_x, cannon_y;
 	getCannonHead(t, &cannon_x, &cannon_y);
-	shot * s = malloc(sizeof(struct shot));
+	shot * s = malloc(sizeof(shot));
 	initShot(s, cannon_x, cannon_y, t->direction, MACRO_SHOT_HEIGHT, MACRO_SHOT_WIDTH, MACRO_SHOT_SPEED);
 	return s;
 }
