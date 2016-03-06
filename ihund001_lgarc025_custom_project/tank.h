@@ -177,18 +177,16 @@ int moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
 	return 1;
 }
 
-void moveTank(tank * t, int d_x, int d_y, int * moved){
-	*moved |= moveTankIfValid(t, d_x, d_y, 0, 0);
+int moveTank(tank * t, int d_x, int d_y){
+	return moveTankIfValid(t, d_x, d_y, 0, 0);
 }
 
-void rotateTankRight(tank * t){
-	if(moveTankIfValid(t, 0, 0, 0, 1))
-		printTank(t);
+int rotateTankRight(tank * t){
+	return moveTankIfValid(t, 0, 0, 0, 1);
 }
 
-void rotateTankLeft(tank * t){
-	if(moveTankIfValid(t, 0, 0, 1, 0))
-		printTank(t);
+int rotateTankLeft(tank * t){
+	return moveTankIfValid(t, 0, 0, 1, 0);
 }
 
 void initTank(tank * t, int x, int y, char direction){

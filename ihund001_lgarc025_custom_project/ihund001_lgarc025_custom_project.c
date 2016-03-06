@@ -15,8 +15,6 @@
 #include "task.h"
 #include "utilities.h"
 
-#define NUM_TASKS 5
-
 #define MOVE_UP_BIT 3
 #define MOVE_DOWN_BIT 1
 #define MOVE_LEFT_BIT 0
@@ -24,13 +22,12 @@
 
 #define ROTATE_LEFT_BIT 4
 #define ROTATE_RIGHT_BIT 5
-
 #define SHOT_BIT 6
 
 #define TANK_MOVE_RATE 5
 
-#define BULLET_QUEUE_SIZE 10
 
+#define NUM_TASKS 6
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
@@ -49,8 +46,20 @@ int SIC_tick(int state);
 enum Movement_Input_Controller_States{MIC_Start, MIC_Process};
 int MIC_tick(int state);
 
+enum Tank_Movement_States{TM_Start, TM_Process};
+int TM_tick(int state);
+
 tank t1;
 tank t2;
+
+#define TANK_UP 0
+#define TANK_DOWN 1
+#define TANK_LEFT 2
+#define TANK_RIGHT 3
+#define TANK_LR 4
+#define TANK_RR 5
+
+int controls[6];
 
 shot* shots_arr[MAX_CONCURRENT_SHOTS];
 
@@ -64,6 +73,7 @@ int main(void)
 	unsigned long TimePeriodGCD = 20;
 	
 	memset(shots_arr, 0, 4* sizeof(shot *));
+	memset(controls, 0, 6* sizeof(int));
 	
 	unsigned char i = 0;
 	tasks[i].state = MIC_Start;
@@ -90,6 +100,11 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &SMC_tick;
+	++i;
+	tasks[i].state = TM_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &TM_tick;
 	
 	TimerFlag = 0;
 	TimerSet(TimePeriodGCD);
@@ -119,16 +134,20 @@ int main(void)
 	}
 }
 
-void moveTankFromInput(tank * t, int up, int down, int left, int right){
+void moveTankFromInput(tank * t, int up, int down, int left, int right, int lr, int rr){
 	int moved = 0;
 	if(up && !down)
-		moveTank(t, 0, TANK_MOVE_RATE, &moved);
-	if(down && !up)
-		moveTank(t, 0, -TANK_MOVE_RATE, &moved);
+		moved |= moveTank(t, 0, TANK_MOVE_RATE);
+	else if(down && !up)
+		moved |= moveTank(t, 0, -TANK_MOVE_RATE);
 	if(left && !right)
-		moveTank(t, TANK_MOVE_RATE, 0, &moved);
-	if(right && !left)
-		moveTank(t, -TANK_MOVE_RATE, 0, &moved);
+		moved |= moveTank(t, TANK_MOVE_RATE, 0);
+	else if(right && !left)
+		moved |= moveTank(t, -TANK_MOVE_RATE, 0);
+	if(lr && !rr)
+		moved |= rotateTankLeft(t);
+	else if(rr && !lr)
+		moved |= rotateTankRight(t);
 	if(moved)
 		printTank(t);
 }
@@ -149,7 +168,10 @@ int MIC_tick(int state){
 	
 	switch(state){
 		case MIC_Process:
-			moveTankFromInput(&t1, up, down, left, right );
+			controls[TANK_UP] = up;
+			controls[TANK_DOWN] = down;
+			controls[TANK_LEFT] = left;
+			controls[TANK_RIGHT] = right;
 			break;
 	}
 
@@ -190,7 +212,7 @@ int LRIC_tick(int state){
 			break;
 		case LRIC_Wait:
 			if(rotate_left){
-				rotateTankLeft(&t1);
+				controls[TANK_LR] = 0;
 				state = LRIC_Hold;
 			}
 			break;
@@ -214,7 +236,7 @@ int RRIC_tick(int state){
 			break;
 		case RRIC_Wait:
 			if(rotate_right){
-				rotateTankRight(&t1);
+				controls[TANK_RR] = 1;
 				state = RRIC_Hold;
 			}
 			break;
@@ -238,6 +260,23 @@ int SMC_tick(int state){
 		case SMC_Process:
 			moveAllShots(shots_arr);
 			break;
+	}
+	
+	return state;
+}
+
+int TM_tick(int state){
+	switch(state){
+		case TM_Start:
+			state = TM_Process;
+			break;
+	}
+	
+	switch(state){
+		case TM_Process:
+			moveTankFromInput(&t1, controls[TANK_UP], controls[TANK_DOWN], controls[TANK_LEFT], controls[TANK_RIGHT], controls[TANK_LR], controls[TANK_RR] );
+			controls[TANK_LR] = 0;
+			controls[TANK_RR] = 0;
 	}
 	
 	return state;
