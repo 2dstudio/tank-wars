@@ -50,9 +50,10 @@ void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
 	w->u_y = u_y;
 }
 
-void colorTank(tank t, unsigned int color);
+void colorTank(tank * t, unsigned int color);
 int tankInBounds(tank *t);
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
+void clearTank(tank * t);
 
 void initShot(shot * s, int x, int y, char direction, int shot_height, int shot_width, unsigned int speed){
 	s->x = x;
@@ -164,16 +165,19 @@ int tankInBounds(tank * t){
 	return windowInBounds(&w);
 }
 
-void moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
+int moveTankIfValid(tank * t, int d_x, int d_y, char left, char right){
 	tank t_new;
 	getNewTankPosition(&t_new, t, d_x, d_y, left, right);
-	if(tankInBounds(&t_new)){
-		*t = t_new;
+	if(!tankInBounds(&t_new)){
+		return 0;
 	}
+	clearTank(t);
+	*t = t_new;
+	return 1;
 }
 
-void moveTank(tank * t, int d_x, int d_y){
-	moveTankIfValid(t, d_x, d_y, 0, 0);
+void moveTank(tank * t, int d_x, int d_y, int * moved){
+	*moved = moveTankIfValid(t, d_x, d_y, 0, 0);
 }
 
 void rotateTankRight(tank * t){
@@ -194,16 +198,16 @@ void initTank(tank * t, int x, int y, char direction){
 	t->direction = direction;
 }
 
-void printTank(tank t){
+void printTank(tank * t){
 	colorTank(t, 0);
 }
 
-void clearTank(tank t){
+void clearTank(tank * t){
 	colorTank(t, 0xffff);
 }
 
-void colorTank(tank t, unsigned int color){
-	
+void colorTank(tank * tp, unsigned int color){
+	tank t = *tp;
 	unsigned int cannon_offset =  ( t.tank_width - t.cannon_width )/2;
 	
 	if(t.direction == 'N'){

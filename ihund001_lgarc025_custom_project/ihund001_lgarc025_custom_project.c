@@ -15,7 +15,7 @@
 #include "task.h"
 #include "utilities.h"
 
-#define NUM_TASKS 6
+#define NUM_TASKS 5
 
 #define MOVE_UP_BIT 3
 #define MOVE_DOWN_BIT 1
@@ -97,11 +97,11 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &SMC_tick;
-	++i;
+	/*++i;
 	tasks[i].state = DH_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &DH_tick;
+	tasks[i].TickFct = &DH_tick;*/
 	
 	
 	TimerFlag = 0;
@@ -115,8 +115,8 @@ int main(void)
 	initTank(&t1, 100, 50, 'N');
 	initTank(&t2, 100, 400, 'S');
 	
-	printTank(t1);
-	printTank(t2);
+	printTank(&t1);
+	printTank(&t2);
 	
 	while(1)
 	{	
@@ -134,18 +134,27 @@ int main(void)
 	}
 }
 
+void moveTankFromInput(tank * t, int up, int down, int left, int right){
+	int moved = 0;
+	if(up && !down)
+		moveTank(t, 0, TANK_MOVE_RATE, &moved);
+	if(down && !up)
+		moveTank(t, 0, -TANK_MOVE_RATE, &moved);
+	if(left && !right)
+		moveTank(t, TANK_MOVE_RATE, 0, &moved);
+	if(right && !left)
+		moveTank(t, -TANK_MOVE_RATE, 0, &moved);
+	if(moved)
+		printTank(t);
+}
+
 int MIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
 	unsigned char up = GetBit(us_pina, MOVE_UP_BIT);
-	unsigned char bottom = GetBit(us_pina, MOVE_DOWN_BIT);
+	unsigned char down = GetBit(us_pina, MOVE_DOWN_BIT);
 	unsigned char left = GetBit(us_pina, MOVE_LEFT_BIT);
 	unsigned char right = GetBit(us_pina, MOVE_RIGHT_BIT);
-	
-	unsigned char tank_move_rate = TANK_MOVE_RATE;
-	
-	int d_x = 0;
-	int d_y = 0;
 	
 	switch(state){
 		case MIC_Start:
@@ -155,15 +164,7 @@ int MIC_tick(int state){
 	
 	switch(state){
 		case MIC_Process:
-			if(up)
-				d_y += tank_move_rate;
-			if(bottom)
-				d_y -= tank_move_rate;
-			if(left)
-				d_x += tank_move_rate;
-			if(right)
-				d_x -= tank_move_rate;
-			moveTank(&t1, d_x, d_y);
+			moveTankFromInput(&t1, up, down, left, right );
 			break;
 	}
 
@@ -267,14 +268,14 @@ int DH_tick(int state){
 	
 	switch(state){// Actions
 		case DH_Process:
-			if(tankMoved(& t1_old, & t1)){
+			/*if(tankMoved(& t1_old, & t1)){
 				clearTank(t1_old);
 				printTank(t1);
 			}
 			if(tankMoved(& t2_old, & t2)){
 				clearTank(t2_old);
 				printTank(t2);
-			}
+			}*/
 			break;
 	}
 	
