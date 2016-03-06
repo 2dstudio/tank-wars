@@ -212,7 +212,7 @@ int LRIC_tick(int state){
 			break;
 		case LRIC_Wait:
 			if(rotate_left){
-				controls[TANK_LR] = 0;
+				controls[TANK_LR] = 1;
 				state = LRIC_Hold;
 			}
 			break;

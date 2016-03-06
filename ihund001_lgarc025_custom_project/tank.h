@@ -109,7 +109,7 @@ void moveTankInternal(tank * t, int d_x, int d_y, char left, char right){
 	t->x += d_x;
 	t->y += d_y;
 	
-	if(left){
+	if(right){
 		if(t->tank_direction == 'N')
 		t->tank_direction = 'E';
 		else if (t->tank_direction == 'E')
@@ -120,7 +120,7 @@ void moveTankInternal(tank * t, int d_x, int d_y, char left, char right){
 		t->tank_direction = 'N';
 	}
 	
-	if(right){
+	if(left){
 		if(t->tank_direction == 'N')
 		t->tank_direction = 'W';
 		else if (t->tank_direction == 'W')
