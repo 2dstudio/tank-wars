@@ -61,7 +61,7 @@ tank t2;
 
 int controls[6];
 
-shot* shots_arr[MAX_CONCURRENT_SHOTS];
+bullet* shots_arr[MAX_CONCURRENT_SHOTS];
 
 int main(void)
 {
@@ -72,7 +72,7 @@ int main(void)
 	unsigned int input_rate = 40;
 	unsigned long TimePeriodGCD = 20;
 	
-	memset(shots_arr, 0, 4* sizeof(shot *));
+	memset(shots_arr, 0, 4* sizeof(bullet *));
 	memset(controls, 0, 6* sizeof(int));
 	
 	unsigned char i = 0;

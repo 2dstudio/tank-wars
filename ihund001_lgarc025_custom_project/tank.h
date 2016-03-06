@@ -6,9 +6,9 @@
 #define MACRO_CANNON_WIDTH 7
 #define MACRO_CANNON_LENGTH 15
 
-#define MACRO_SHOT_SPEED 10
-#define MACRO_SHOT_HEIGHT 7
-#define MACRO_SHOT_WIDTH 7
+#define MACRO_BULLET_SPEED 10
+#define MACRO_BULLET_HEIGHT 7
+#define MACRO_BULLET_WIDTH 7
 
 #define SCREEN_X_MAX 320
 #define SCREEN_X_MIN 0
@@ -17,6 +17,9 @@
 
 #define MAX_CONCURRENT_SHOTS 4
 
+#define INITIAL_HEALTH 5
+#define INITIAL_BULLET_COUNT 5 
+
 typedef struct _tank {
 	int x;
 	int y;
@@ -24,17 +27,22 @@ typedef struct _tank {
 	unsigned int tank_width;
 	unsigned int cannon_length;
 	unsigned int cannon_width;
-	char direction;
+	char tank_direction;
+	char health;
+	int bullet_speed;
+	int bullet_height;
+	int bullet_width;
+	int bullet_count;
 } tank;
 
-typedef struct _shot {
+typedef struct _bullet {
 	int x;
 	int y;
-	int shot_height;
-	int shot_width;
-	unsigned int speed;
-	char direction;
-} shot;
+	int bullet_height;
+	int bullet_width;
+	unsigned int bullet_speed;
+	char bullet_direction;
+} bullet;
 
 typedef struct _window {
 	int l_x;
@@ -43,6 +51,12 @@ typedef struct _window {
 	int u_y;
 } window;
 
+void colorTank(tank * t, unsigned int color);
+int tankInBounds(tank *t);
+void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
+void clearTank(tank * t);
+void printTank(tank * t);
+
 void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
 	w->l_x = l_x;
 	w->l_y = l_y;
@@ -50,26 +64,32 @@ void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
 	w->u_y = u_y;
 }
 
-void colorTank(tank * t, unsigned int color);
-int tankInBounds(tank *t);
-void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
-void clearTank(tank * t);
-void printTank(tank * t);
-
-void initShot(shot * s, int x, int y, char direction, int shot_height, int shot_width, unsigned int speed){
-	s->x = x;
-	s->y = y;
-	s->shot_height = shot_height;
-	s->shot_width = shot_width;
-	s->speed = speed;
-	s->direction = direction;
+void initTank(tank * t, int x, int y, char direction){
+	t->x = x;
+	t->y = y;
+	t->tank_length = MACRO_TANK_LENGTH;
+	t->tank_width = MACRO_TANK_WIDTH;
+	t->cannon_length = MACRO_CANNON_LENGTH;
+	t->cannon_width = MACRO_CANNON_WIDTH;
+	t->bullet_speed = MACRO_BULLET_SPEED;
+	t->bullet_height = MACRO_BULLET_HEIGHT;
+	t->bullet_width = MACRO_BULLET_WIDTH;
+	t->health = INITIAL_HEALTH;
+	t->bullet_count = INITIAL_BULLET_COUNT;
+	t->tank_direction = direction;
 }
 
-shot * createShot(tank * t){
-	int cannon_x, cannon_y;
-	getCannonHead(t, &cannon_x, &cannon_y);
-	shot * s = malloc(sizeof(shot));
-	initShot(s, cannon_x, cannon_y, t->direction, MACRO_SHOT_HEIGHT, MACRO_SHOT_WIDTH, MACRO_SHOT_SPEED);
+void initShot(const tank * t,bullet * s){
+	getCannonHead(t, &s->x, &s->y);
+	s->bullet_height = t->bullet_height;
+	s->bullet_width = t->bullet_width;
+	s->bullet_speed = t->bullet_speed;
+	s->bullet_direction = t->tank_direction;
+}
+
+bullet * createShot(const tank * t){
+	bullet * s = malloc(sizeof(bullet));
+	initShot(t, s);
 	return s;
 }
 
@@ -78,7 +98,7 @@ int tankMoved(tank * t_old, tank * t){
 		return 1;
 	}
 	
-	if(t_old->direction != t->direction){
+	if(t_old->tank_direction != t->tank_direction){
 		return 1;
 	}
 	
@@ -90,25 +110,25 @@ void moveTankInternal(tank * t, int d_x, int d_y, char left, char right){
 	t->y += d_y;
 	
 	if(left){
-		if(t->direction == 'N')
-		t->direction = 'E';
-		else if (t->direction == 'E')
-		t->direction = 'S';
-		else if(t->direction == 'S')
-		t->direction = 'W';
-		else if(t->direction == 'W')
-		t->direction = 'N';
+		if(t->tank_direction == 'N')
+		t->tank_direction = 'E';
+		else if (t->tank_direction == 'E')
+		t->tank_direction = 'S';
+		else if(t->tank_direction == 'S')
+		t->tank_direction = 'W';
+		else if(t->tank_direction == 'W')
+		t->tank_direction = 'N';
 	}
 	
 	if(right){
-		if(t->direction == 'N')
-		t->direction = 'W';
-		else if (t->direction == 'W')
-		t->direction = 'S';
-		else if(t->direction == 'S')
-		t->direction = 'E';
-		else if(t->direction == 'E')
-		t->direction = 'N';
+		if(t->tank_direction == 'N')
+		t->tank_direction = 'W';
+		else if (t->tank_direction == 'W')
+		t->tank_direction = 'S';
+		else if(t->tank_direction == 'S')
+		t->tank_direction = 'E';
+		else if(t->tank_direction == 'E')
+		t->tank_direction = 'N';
 	}	
 }
 
@@ -119,21 +139,21 @@ void getNewTankPosition(tank * t_new, tank * t, int d_x, int d_y, char left, cha
 
 void getEffectiveTankWindow(tank *t, window * w){
 	int lower_x, lower_y, upper_x, upper_y;
-	if(t->direction == 'N'){
+	if(t->tank_direction == 'N'){
 		lower_x = t->x;
 		lower_y = t->y;
 		
 		upper_x = t->x + t->tank_width;
 		upper_y = t->y + t->tank_length + t->cannon_length;
 	}
-	else if(t->direction == 'E'){
+	else if(t->tank_direction == 'E'){
 		lower_x = t->x - t->cannon_length;
 		lower_y = t->y;
 		
 		upper_x = t->x + t->tank_length;
 		upper_y = t->y + t->tank_width;
 	}
-	else if(t->direction == 'S'){
+	else if(t->tank_direction == 'S'){
 		lower_x = t->x;
 		lower_y = t->y - t->cannon_length;
 		
@@ -189,16 +209,6 @@ int rotateTankLeft(tank * t){
 	return moveTankIfValid(t, 0, 0, 1, 0);
 }
 
-void initTank(tank * t, int x, int y, char direction){
-	t->x = x;
-	t->y = y;
-	t->tank_length = MACRO_TANK_LENGTH;
-	t->tank_width = MACRO_TANK_WIDTH;
-	t->cannon_length = MACRO_CANNON_LENGTH;
-	t->cannon_width = MACRO_CANNON_WIDTH;
-	t->direction = direction;
-}
-
 void printTank(tank * t){
 	colorTank(t, 0);
 }
@@ -211,22 +221,22 @@ void colorTank(tank * tp, unsigned int color){
 	tank t = *tp;
 	unsigned int cannon_offset =  ( t.tank_width - t.cannon_width )/2;
 	
-	if(t.direction == 'N'){
+	if(t.tank_direction == 'N'){
 		//fillRect(t.x, t.y, t.tank_width, t.tank_length, color);
 		//fillRect(t.x + cannon_offset , t.y + t.tank_length, t.cannon_width, t.cannon_length, color);
 		drawRect(t.x, t.y, t.tank_width, t.tank_length, color);
 		drawRect(t.x + cannon_offset , t.y + t.tank_length, t.cannon_width, t.cannon_length, color);
-	} else if(t.direction == 'E') {
+	} else if(t.tank_direction == 'E') {
 		//fillRect(t.x, t.y, t.tank_length, t.tank_width, color);
 		//fillRect(t.x - t.cannon_length, t.y + cannon_offset, t.cannon_length, t.cannon_width, color);
 		drawRect(t.x, t.y, t.tank_length, t.tank_width, color);
 		drawRect(t.x - t.cannon_length, t.y + cannon_offset, t.cannon_length, t.cannon_width, color);
-	} else if(t.direction == 'S') {
+	} else if(t.tank_direction == 'S') {
 		//fillRect(t.x, t.y, t.tank_width, t.tank_length, color);
 		//fillRect(t.x + cannon_offset , t.y - t.cannon_length, t.cannon_width, t.cannon_length, color);
 		drawRect(t.x, t.y, t.tank_width, t.tank_length, color);
 		drawRect(t.x + cannon_offset , t.y - t.cannon_length, t.cannon_width, t.cannon_length, color);
-	}else if(t.direction == 'W') {
+	}else if(t.tank_direction == 'W') {
 		//fillRect(t.x, t.y, t.tank_length, t.tank_width, color);
 		//fillRect(t.x + t.tank_length, t.y + cannon_offset, t.cannon_length, t.cannon_width, color);
 		drawRect(t.x, t.y, t.tank_length, t.tank_width, color);
@@ -234,17 +244,17 @@ void colorTank(tank * tp, unsigned int color){
 	}
 }
 
-int shotInBounds(shot *s){
-	int lower_x = s->x, lower_y = s->y, upper_x = s->x + s->shot_width, upper_y = s->y + s->shot_height;
+int shotInBounds(bullet *s){
+	int lower_x = s->x, lower_y = s->y, upper_x = s->x + s->bullet_width, upper_y = s->y + s->bullet_height;
 	window w;
 	initWindow(&w, lower_x, lower_y, upper_x, upper_y);
 	
 	return windowInBounds(&w);
 }
 
-int moveSingleShot(shot * s){
+int moveSingleShot(bullet * s){
 	// Code to move shot here
-	s->y += s->speed;
+	s->y += s->bullet_speed;
 	
 	// Bound Checking
 	if(!shotInBounds(s))
@@ -254,23 +264,23 @@ int moveSingleShot(shot * s){
 	return 1;
 }
 
-void colorShot(const shot * s, unsigned int color){
-	drawRect(s->x, s->y, s->shot_width, s->shot_height, color);
+void colorShot(const bullet * s, unsigned int color){
+	drawRect(s->x, s->y, s->bullet_width, s->bullet_height, color);
 }
 
-void clearShot(shot * s){
+void clearShot(bullet * s){
 	colorShot(s, 0xffff);
 }
 
-void printShot(shot * s){
+void printShot(bullet * s){
 	colorShot(s, 0);
 }
 
-void deleteShot(shot * s){
+void deleteShot(bullet * s){
 	free(s);
 }
 
-void moveAllShots(shot * shots_arr[]){
+void moveAllShots(bullet * shots_arr[]){
 	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
 		if(shots_arr[i]!=0){
 			clearShot(shots_arr[i]);
@@ -284,8 +294,8 @@ void moveAllShots(shot * shots_arr[]){
 	}
 }
 
-void makeShot(tank * t, shot * shots_arr[]){
-	shot * s = createShot(t);
+void makeShot(tank * t, bullet * shots_arr[]){
+	bullet * s = createShot(t);
 	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
 		if(shots_arr[i] == NULL){
 			shots_arr[i] = s;
@@ -299,7 +309,7 @@ void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
 	
 	unsigned int cannon_offset =  ( t->tank_width - t->cannon_width )/2;
 	
-	if(t->direction == 'N'){
+	if(t->tank_direction == 'N'){
 		*cannon_x = t->x + cannon_offset;
 		*cannon_y = t->y + t->tank_length + t->cannon_length;
 	} else{
