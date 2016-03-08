@@ -23,10 +23,18 @@
 #define T1_ROTATE_RIGHT_BIT 5
 #define T1_SHOT_BIT 6
 
+#define T2_MOVE_UP_BIT 5
+#define T2_MOVE_DOWN_BIT 2
+#define T2_MOVE_LEFT_BIT 1
+#define T2_MOVE_RIGHT_BIT 3
+#define T2_ROTATE_LEFT_BIT 4
+#define T2_ROTATE_RIGHT_BIT 6
+#define T2_SHOT_BIT 0
+
 #define TANK_MOVE_RATE 5
 
 
-#define NUM_TASKS 6
+#define NUM_TASKS 10
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
@@ -46,6 +54,19 @@ int T1_SIC_tick(int state);
 
 enum T1_Movement_Input_Controller_States{T1_MIC_Start, T1_MIC_Process};
 int T1_MIC_tick(int state);
+
+// Input for tank 2
+enum T2_Left_Rotation_Input_Controller_States{T2_LRIC_Start, T2_LRIC_Wait, T2_LRIC_Hold};
+int T2_LRIC_tick(int state);
+
+enum T2_Right_Rotation_Input_Controller_States{T2_RRIC_Start, T2_RRIC_Wait, T2_RRIC_Hold};
+int T2_RRIC_tick(int state);
+
+enum T2_Shot_Input_Controller_States{T2_SIC_Start, T2_SIC_Wait, T2_SIC_Hold};
+int T2_SIC_tick(int state);
+
+enum T2_Movement_Input_Controller_States{T2_MIC_Start, T2_MIC_Process};
+int T2_MIC_tick(int state);
 
 // Tank mover
 enum Tank_Movement_States{TM_Start, TM_Process};
@@ -69,6 +90,7 @@ bullet* shots_arr[MAX_CONCURRENT_SHOTS];
 int main(void)
 {
 	DDRA = 0x00; PORTA = 0xFF;
+	DDRD = 0x00; PORTD = 0xFF;
 	DDRC = 0xFF; PORTC = 0x00;
 	
 	unsigned int display_refresh_rate = 20;
@@ -80,6 +102,11 @@ int main(void)
 	memset(t2_controls, 0, 6* sizeof(int));
 	
 	unsigned char i = 0;
+	tasks[i].state = SMC_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &SMC_tick;
+	++i;
 	tasks[i].state = T1_MIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
@@ -95,15 +122,30 @@ int main(void)
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T1_RRIC_tick;
 	++i;
-	tasks[i].state = SMC_Start;
-	tasks[i].period = display_refresh_rate;
-	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &SMC_tick;
-	++i;
 	tasks[i].state = T1_SIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T1_SIC_tick;
+	++i;
+	tasks[i].state = T2_MIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &T2_MIC_tick;
+	++i;
+	tasks[i].state = T2_LRIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &T2_LRIC_tick;
+	++i;
+	tasks[i].state = T2_RRIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &T2_RRIC_tick;
+	++i;
+	tasks[i].state = T2_SIC_Start;
+	tasks[i].period = input_rate;
+	tasks[i].elapsedTime = input_rate;
+	tasks[i].TickFct = &T2_SIC_tick;
 	++i;
 	tasks[i].state = TM_Start;
 	tasks[i].period = display_refresh_rate;
@@ -182,6 +224,32 @@ int T1_MIC_tick(int state){
 	return state;
 }
 
+int T2_MIC_tick(int state){
+	
+	unsigned char us_pind = ~PIND;
+	unsigned char up = GetBit(us_pind, T2_MOVE_UP_BIT);
+	unsigned char down = GetBit(us_pind, T2_MOVE_DOWN_BIT);
+	unsigned char left = GetBit(us_pind, T2_MOVE_LEFT_BIT);
+	unsigned char right = GetBit(us_pind, T2_MOVE_RIGHT_BIT);
+	
+	switch(state){
+		case T2_MIC_Start:
+		state = T2_MIC_Process;
+		break;
+	}
+	
+	switch(state){
+		case T2_MIC_Process:
+		t2_controls[TANK_UP] = up;
+		t2_controls[TANK_DOWN] = down;
+		t2_controls[TANK_LEFT] = left;
+		t2_controls[TANK_RIGHT] = right;
+		break;
+	}
+
+	return state;
+}
+
 int T1_SIC_tick(int state){
 	unsigned char us_pina = ~PINA;
 	unsigned char shoot = GetBit(us_pina, T1_SHOT_BIT);
@@ -201,6 +269,29 @@ int T1_SIC_tick(int state){
 				state = T1_SIC_Wait;
 			}
 			break;
+	}
+	return state;
+}
+
+int T2_SIC_tick(int state){
+	unsigned char us_pind = ~PIND;
+	unsigned char shoot = GetBit(us_pind, T2_SHOT_BIT);
+	
+	switch(state){
+		case T2_SIC_Start:
+		state = T2_SIC_Wait;
+		break;
+		case T2_SIC_Wait:
+		if(shoot){
+			makeShot(&t2, shots_arr);
+			state = T2_SIC_Hold;
+		}
+		break;
+		case T2_SIC_Hold:
+		if(!shoot){
+			state = T2_SIC_Wait;
+		}
+		break;
 	}
 	return state;
 }
@@ -229,6 +320,30 @@ int T1_LRIC_tick(int state){
 	return state;
 }
 
+int T2_LRIC_tick(int state){
+	
+	unsigned char us_pind = ~PIND;
+	unsigned char rotate_left = GetBit(us_pind, T2_ROTATE_LEFT_BIT);
+	
+	switch(state){
+		case T2_LRIC_Start:
+		state = T2_LRIC_Wait;
+		break;
+		case T2_LRIC_Wait:
+		if(rotate_left){
+			t2_controls[TANK_LR] = 1;
+			state = T2_LRIC_Hold;
+		}
+		break;
+		case T2_LRIC_Hold:
+		if(!rotate_left){
+			state = T2_LRIC_Wait;
+		}
+		break;
+	}
+	return state;
+}
+
 int T1_RRIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
@@ -249,6 +364,30 @@ int T1_RRIC_tick(int state){
 				state = T1_RRIC_Wait;
 			}
 			break;
+	}
+	return state;
+}
+
+int T2_RRIC_tick(int state){
+	
+	unsigned char us_pind = ~PIND;
+	unsigned char rotate_right = GetBit(us_pind, T2_ROTATE_RIGHT_BIT);
+	
+	switch(state){
+		case T2_RRIC_Start:
+		state = T2_RRIC_Wait;
+		break;
+		case T2_RRIC_Wait:
+		if(rotate_right){
+			t2_controls[TANK_RR] = 1;
+			state = T2_RRIC_Hold;
+		}
+		break;
+		case T2_RRIC_Hold:
+		if(!rotate_right){
+			state = T2_RRIC_Wait;
+		}
+		break;
 	}
 	return state;
 }
@@ -281,6 +420,9 @@ int TM_tick(int state){
 			moveTankFromInput(&t1, &t2, t1_controls[TANK_UP], t1_controls[TANK_DOWN], t1_controls[TANK_LEFT], t1_controls[TANK_RIGHT], t1_controls[TANK_LR], t1_controls[TANK_RR] );
 			t1_controls[TANK_LR] = 0;
 			t1_controls[TANK_RR] = 0;
+			moveTankFromInput(&t2, &t1, t2_controls[TANK_UP], t2_controls[TANK_DOWN], t2_controls[TANK_LEFT], t2_controls[TANK_RIGHT], t2_controls[TANK_LR], t2_controls[TANK_RR] );
+			t2_controls[TANK_LR] = 0;
+			t2_controls[TANK_RR] = 0;
 	}
 	
 	return state;
