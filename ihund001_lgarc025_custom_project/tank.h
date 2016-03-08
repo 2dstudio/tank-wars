@@ -374,7 +374,14 @@ int shotHitTank(const bullet * s, const tank * t1, const tank * t2){
 }
 
 int moveSingleShot(bullet * s, const tank * t1, const tank *t2){
-	s->y += s->bullet_speed;
+	if(s->bullet_direction == 'N')
+		s->y += s->bullet_speed;
+	else if(s->bullet_direction == 'E')
+		s->x -= s->bullet_speed;
+	else if(s->bullet_direction == 'S')
+		s->y -= s->bullet_speed;
+	else
+		s->x += s->bullet_speed;
 	
 	if(!shotInBounds(s))
 		return 0;
@@ -433,17 +440,15 @@ void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
 	if(t->tank_direction == 'N'){
 		*cannon_x = t->x + cannon_offset;
 		*cannon_y = t->y + t->tank_length + t->cannon_length;
-	} else{
-		*cannon_x=200;
-		*cannon_y=100;
+	} else if (t->tank_direction == 'E'){
+		*cannon_x = t->x - t->cannon_length - MACRO_BULLET_HEIGHT;
+		*cannon_y = t->y + cannon_offset;
+	} else if (t->tank_direction == 'S'){
+		*cannon_x = t->x + cannon_offset;
+		*cannon_y = t->y - t->cannon_length - MACRO_BULLET_HEIGHT;
+	} else {
+		*cannon_x = t->x + t->tank_length + t->cannon_length;
+		*cannon_y = t->y + cannon_offset;
 	}
-	
-	 /*else if (t->direction == 'E'){
-		
-	} else if (t->direction == 'S'){
-		
-	} else if (t->direction == 'W'){
-		
-	}*/
 }
 #endif
