@@ -15,14 +15,13 @@
 #include "task.h"
 #include "utilities.h"
 
-#define MOVE_UP_BIT 3
-#define MOVE_DOWN_BIT 1
-#define MOVE_LEFT_BIT 0
-#define MOVE_RIGHT_BIT 2
-
-#define ROTATE_LEFT_BIT 4
-#define ROTATE_RIGHT_BIT 5
-#define SHOT_BIT 6
+#define T1_MOVE_UP_BIT 3
+#define T1_MOVE_DOWN_BIT 1
+#define T1_MOVE_LEFT_BIT 0
+#define T1_MOVE_RIGHT_BIT 2
+#define T1_ROTATE_LEFT_BIT 4
+#define T1_ROTATE_RIGHT_BIT 5
+#define T1_SHOT_BIT 6
 
 #define TANK_MOVE_RATE 5
 
@@ -31,21 +30,24 @@
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
+// Shots Propagator
 enum Shot_Movement_Controller_States{SMC_Start, SMC_Process};
 int SMC_tick(int state);
 
-enum Left_Rotation_Input_Controller_States{LRIC_Start, LRIC_Wait, LRIC_Hold};
-int LRIC_tick(int state);
+// Input for tank 1
+enum T1_Left_Rotation_Input_Controller_States{T1_LRIC_Start, T1_LRIC_Wait, T1_LRIC_Hold};
+int T1_LRIC_tick(int state);
 
-enum Right_Rotation_Input_Controller_States{RRIC_Start, RRIC_Wait, RRIC_Hold};
-int RRIC_tick(int state);
+enum T1_Right_Rotation_Input_Controller_States{T1_RRIC_Start, T1_RRIC_Wait, T1_RRIC_Hold};
+int T1_RRIC_tick(int state);
 
-enum Shot_Input_Controller_States{SIC_Start, SIC_Wait, SIC_Hold};
-int SIC_tick(int state);
+enum T1_Shot_Input_Controller_States{T1_SIC_Start, T1_SIC_Wait, T1_SIC_Hold};
+int T1_SIC_tick(int state);
 
-enum Movement_Input_Controller_States{MIC_Start, MIC_Process};
-int MIC_tick(int state);
+enum T1_Movement_Input_Controller_States{T1_MIC_Start, T1_MIC_Process};
+int T1_MIC_tick(int state);
 
+// Tank mover
 enum Tank_Movement_States{TM_Start, TM_Process};
 int TM_tick(int state);
 
@@ -59,7 +61,8 @@ tank t2;
 #define TANK_LR 4
 #define TANK_RR 5
 
-int controls[6];
+int t1_controls[6];
+int t2_controls[6];
 
 bullet* shots_arr[MAX_CONCURRENT_SHOTS];
 
@@ -73,33 +76,34 @@ int main(void)
 	unsigned long TimePeriodGCD = 20;
 	
 	memset(shots_arr, 0, 4* sizeof(bullet *));
-	memset(controls, 0, 6* sizeof(int));
+	memset(t1_controls, 0, 6* sizeof(int));
+	memset(t2_controls, 0, 6* sizeof(int));
 	
 	unsigned char i = 0;
-	tasks[i].state = MIC_Start;
+	tasks[i].state = T1_MIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
-	tasks[i].TickFct = &MIC_tick;
+	tasks[i].TickFct = &T1_MIC_tick;
 	++i;
-	tasks[i].state = LRIC_Start;
+	tasks[i].state = T1_LRIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
-	tasks[i].TickFct = &LRIC_tick;
+	tasks[i].TickFct = &T1_LRIC_tick;
 	++i;
-	tasks[i].state = RRIC_Start;
+	tasks[i].state = T1_RRIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
-	tasks[i].TickFct = &RRIC_tick;
+	tasks[i].TickFct = &T1_RRIC_tick;
 	++i;
 	tasks[i].state = SMC_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &SMC_tick;
 	++i;
-	tasks[i].state = SIC_Start;
+	tasks[i].state = T1_SIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
-	tasks[i].TickFct = &SIC_tick;
+	tasks[i].TickFct = &T1_SIC_tick;
 	++i;
 	tasks[i].state = TM_Start;
 	tasks[i].period = display_refresh_rate;
@@ -152,97 +156,97 @@ void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int righ
 		printTank(t1);
 }
 
-int MIC_tick(int state){
+int T1_MIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
-	unsigned char up = GetBit(us_pina, MOVE_UP_BIT);
-	unsigned char down = GetBit(us_pina, MOVE_DOWN_BIT);
-	unsigned char left = GetBit(us_pina, MOVE_LEFT_BIT);
-	unsigned char right = GetBit(us_pina, MOVE_RIGHT_BIT);
+	unsigned char up = GetBit(us_pina, T1_MOVE_UP_BIT);
+	unsigned char down = GetBit(us_pina, T1_MOVE_DOWN_BIT);
+	unsigned char left = GetBit(us_pina, T1_MOVE_LEFT_BIT);
+	unsigned char right = GetBit(us_pina, T1_MOVE_RIGHT_BIT);
 	
 	switch(state){
-		case MIC_Start:
-			state = MIC_Process;
+		case T1_MIC_Start:
+			state = T1_MIC_Process;
 			break;
 	}
 	
 	switch(state){
-		case MIC_Process:
-			controls[TANK_UP] = up;
-			controls[TANK_DOWN] = down;
-			controls[TANK_LEFT] = left;
-			controls[TANK_RIGHT] = right;
+		case T1_MIC_Process:
+			t1_controls[TANK_UP] = up;
+			t1_controls[TANK_DOWN] = down;
+			t1_controls[TANK_LEFT] = left;
+			t1_controls[TANK_RIGHT] = right;
 			break;
 	}
 
 	return state;
 }
 
-int SIC_tick(int state){
+int T1_SIC_tick(int state){
 	unsigned char us_pina = ~PINA;
-	unsigned char shoot = GetBit(us_pina, SHOT_BIT);
+	unsigned char shoot = GetBit(us_pina, T1_SHOT_BIT);
 	
 	switch(state){
-		case SIC_Start:
-			state = SIC_Wait;
+		case T1_SIC_Start:
+			state = T1_SIC_Wait;
 			break;
-		case SIC_Wait:
+		case T1_SIC_Wait:
 			if(shoot){
 				makeShot(&t1, shots_arr);
-				state = SIC_Hold;
+				state = T1_SIC_Hold;
 			}
 			break;
-		case SIC_Hold:
+		case T1_SIC_Hold:
 			if(!shoot){
-				state = SIC_Wait;
+				state = T1_SIC_Wait;
 			}
 			break;
 	}
 	return state;
 }
 
-int LRIC_tick(int state){
+int T1_LRIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
-	unsigned char rotate_left = GetBit(us_pina, ROTATE_LEFT_BIT);
+	unsigned char rotate_left = GetBit(us_pina, T1_ROTATE_LEFT_BIT);
 	
 	switch(state){
-		case LRIC_Start:
-			state = LRIC_Wait;
+		case T1_LRIC_Start:
+			state = T1_LRIC_Wait;
 			break;
-		case LRIC_Wait:
+		case T1_LRIC_Wait:
 			if(rotate_left){
-				controls[TANK_LR] = 1;
-				state = LRIC_Hold;
+				t1_controls[TANK_LR] = 1;
+				state = T1_LRIC_Hold;
 			}
 			break;
-		case LRIC_Hold:
+		case T1_LRIC_Hold:
 			if(!rotate_left){
-				state = LRIC_Wait;
+				state = T1_LRIC_Wait;
 			}
 			break;
 	}
 	return state;
 }
 
-int RRIC_tick(int state){
+int T1_RRIC_tick(int state){
 	
 	unsigned char us_pina = ~PINA;
-	unsigned char rotate_right = GetBit(us_pina, ROTATE_RIGHT_BIT);
+	unsigned char rotate_right = GetBit(us_pina, T1_ROTATE_RIGHT_BIT);
 	
 	switch(state){	
-		case RRIC_Start:
-			state = RRIC_Wait;
+		case T1_RRIC_Start:
+			state = T1_RRIC_Wait;
 			break;
-		case RRIC_Wait:
+		case T1_RRIC_Wait:
 			if(rotate_right){
-				controls[TANK_RR] = 1;
-				state = RRIC_Hold;
+				t1_controls[TANK_RR] = 1;
+				state = T1_RRIC_Hold;
 			}
 			break;
-		case RRIC_Hold:
+		case T1_RRIC_Hold:
 			if(!rotate_right){
-				state = RRIC_Wait;
+				state = T1_RRIC_Wait;
 			}
 			break;
 	}
@@ -274,9 +278,9 @@ int TM_tick(int state){
 	
 	switch(state){
 		case TM_Process:
-			moveTankFromInput(&t1, &t2, controls[TANK_UP], controls[TANK_DOWN], controls[TANK_LEFT], controls[TANK_RIGHT], controls[TANK_LR], controls[TANK_RR] );
-			controls[TANK_LR] = 0;
-			controls[TANK_RR] = 0;
+			moveTankFromInput(&t1, &t2, t1_controls[TANK_UP], t1_controls[TANK_DOWN], t1_controls[TANK_LEFT], t1_controls[TANK_RIGHT], t1_controls[TANK_LR], t1_controls[TANK_RR] );
+			t1_controls[TANK_LR] = 0;
+			t1_controls[TANK_RR] = 0;
 	}
 	
 	return state;
