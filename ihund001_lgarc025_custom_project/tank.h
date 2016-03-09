@@ -20,8 +20,8 @@
 #define INITIAL_HEALTH 5
 #define INITIAL_BULLET_COUNT 5 
 
-#define NORMAL_COLOR
-#define HIT_COLOR
+#define NORMAL_COLOR 0x0000
+#define HIT_COLOR 0xF800
 
 typedef struct _tank {
 	int x;
@@ -38,6 +38,7 @@ typedef struct _tank {
 	int bullet_count;
 	int hit;
 	int moved;
+	int color;
 } tank;
 
 typedef struct _bullet {
@@ -84,6 +85,7 @@ void initTank(tank * t, int x, int y, char direction){
 	t->tank_direction = direction;
 	t->hit = 0;
 	t->moved = 0;
+	t->color = NORMAL_COLOR;
 }
 
 void initShot(const tank * t,bullet * s){
@@ -315,7 +317,7 @@ int rotateTankLeft(tank * t1, const tank *t2){
 }
 
 void printTank(const tank * t){
-	colorTank(t, 0);
+	colorTank(t, t->color);
 }
 
 void clearTank(const tank * t){
@@ -357,7 +359,7 @@ int shotInBounds(bullet *s){
 	return windowInBounds(&w);
 }
 
-int shotHitTank(const bullet * s, const tank * t1, const tank * t2){
+int shotHitTank(const bullet * s, tank * t1, tank * t2){
 	window bullet_window, t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
 	
 	getBulletWindow(s, &bullet_window);
@@ -367,20 +369,18 @@ int shotHitTank(const bullet * s, const tank * t1, const tank * t2){
 	getTankBodyWindow(t2, &t2_body_window);
 	getTankCannonWindow(t2, &t2_cannon_window);
 	
-	// If bullet collides with a window.
-	// Take health etc
-	if(windowsCollide(&bullet_window,&t1_body_window))
+	if(windowsCollide(&bullet_window,&t1_body_window) || windowsCollide(&bullet_window,&t1_cannon_window)){
+		t1->hit = 1;
 		return 1;
-	if(windowsCollide(&bullet_window,&t1_cannon_window))
+	}
+	if(windowsCollide(&bullet_window,&t2_body_window) || windowsCollide(&bullet_window,&t2_cannon_window)){
+		t2->hit = 1;
 		return 1;
-	if(windowsCollide(&bullet_window,&t2_body_window))
-		return 1;
-	if(windowsCollide(&bullet_window,&t2_cannon_window))
-		return 1;
+	}
 	return 0;
 }
 
-int moveSingleShot(bullet * s, const tank * t1, const tank *t2){
+int moveSingleShot(bullet * s, tank * t1, tank *t2){
 	if(s->bullet_direction == 'N')
 		s->y += s->bullet_speed;
 	else if(s->bullet_direction == 'E')
@@ -415,7 +415,7 @@ void deleteShot(bullet * s){
 	free(s);
 }
 
-void moveAllShots(bullet * shots_arr[], const tank * t1, const tank *t2){
+void moveAllShots(bullet * shots_arr[], tank * t1, tank *t2){
 	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
 		if(shots_arr[i] != NULL){
 			clearShot(shots_arr[i]);

@@ -34,7 +34,7 @@
 #define TANK_MOVE_RATE 5
 
 
-#define NUM_TASKS 11
+#define NUM_TASKS 12
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
@@ -54,6 +54,10 @@ int T1_SIC_tick(int state);
 
 enum T1_Movement_Input_Controller_States{T1_MIC_Start, T1_MIC_Process};
 int T1_MIC_tick(int state);
+
+// Tank 1 Hit Handler;
+enum T1_Hit_Handler_States{T1_HH_Start, T1_HH_Wait, T1_HH_LOW, T1_HH_HIGH};
+int T1_HH_tick(int state);
 
 // Input for tank 2
 enum T2_Left_Rotation_Input_Controller_States{T2_LRIC_Start, T2_LRIC_Wait, T2_LRIC_Hold};
@@ -155,6 +159,11 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &TM_tick;
+	++i;
+	tasks[i].state = T1_HH_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &T1_HH_tick;
 	++i;
 	tasks[i].state = TDH_Start;
 	tasks[i].period = display_refresh_rate;
@@ -418,7 +427,6 @@ int SMC_tick(int state){
 
 int TM_tick(int state){
 	
-	PORTC = 0xFF;
 	switch(state){
 		case TM_Start:
 			state = TM_Process;
@@ -456,6 +464,59 @@ int TDH_tick(int state){
 				t2.moved = 0;
 			}
 			break;
+	}
+	
+	return state;
+}
+
+int T1_HH_tick(int state){
+	
+	static int flashes = 0;
+	static int count_int = 0;
+	
+	switch(state){
+		case T1_HH_Start:
+			state = T1_HH_Wait;
+			break;
+			
+		case T1_HH_Wait:
+			if(t1.hit == 1){
+				PORTC = 0xFF;
+				state = T1_HH_HIGH;
+				t1.hit = 0;
+				count_int = 0;
+			}
+			break;
+		
+		case T1_HH_HIGH:
+			++count_int;
+			if(count_int == 1){
+				t1.color = HIT_COLOR;
+				t1.moved = 1;
+			}
+			else if(count_int == 10){
+				count_int = 0;
+				state = T1_HH_LOW;
+			}
+			break;
+			
+		case T1_HH_LOW:
+			++count_int;
+			if(count_int == 1){
+				t1.color = NORMAL_COLOR;
+				t1.moved = 1;
+			}
+			else if(count_int == 10){
+				++flashes;
+				count_int = 0;
+				if(flashes == 3){
+					flashes = 0;
+					state = T1_HH_Wait;
+				}
+				else
+					state = T1_HH_HIGH;
+			}
+			break;	
 	}
 	
 	return state;
