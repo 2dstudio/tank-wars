@@ -34,7 +34,7 @@
 #define TANK_MOVE_RATE 5
 
 
-#define NUM_TASKS 10
+#define NUM_TASKS 11
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
@@ -71,6 +71,10 @@ int T2_MIC_tick(int state);
 // Tank mover
 enum Tank_Movement_States{TM_Start, TM_Process};
 int TM_tick(int state);
+
+// Tank Displayer
+enum Tank_Display_Handler_States{TDH_Start, TDH_Process};
+int TDH_tick(int state);
 
 tank t1;
 tank t2;
@@ -151,6 +155,11 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &TM_tick;
+	++i;
+	tasks[i].state = TDH_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &TDH_tick;
 	
 	TimerFlag = 0;
 	TimerSet(TimePeriodGCD);
@@ -194,8 +203,7 @@ void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int righ
 		moved |= rotateTankLeft(t1, t2);
 	else if(rr && !lr)
 		moved |= rotateTankRight(t1, t2);
-	if(moved)
-		printTank(t1);
+	t1->moved = moved;
 }
 
 int T1_MIC_tick(int state){
@@ -409,6 +417,8 @@ int SMC_tick(int state){
 }
 
 int TM_tick(int state){
+	
+	PORTC = 0xFF;
 	switch(state){
 		case TM_Start:
 			state = TM_Process;
@@ -423,6 +433,29 @@ int TM_tick(int state){
 			moveTankFromInput(&t2, &t1, t2_controls[TANK_UP], t2_controls[TANK_DOWN], t2_controls[TANK_LEFT], t2_controls[TANK_RIGHT], t2_controls[TANK_LR], t2_controls[TANK_RR] );
 			t2_controls[TANK_LR] = 0;
 			t2_controls[TANK_RR] = 0;
+	}
+	
+	return state;
+}
+
+int TDH_tick(int state){
+	switch(state){
+		case TDH_Start:
+			state = TDH_Process;
+			break;
+	}
+	
+	switch(state){
+		case TDH_Process:
+			if(t1.moved){
+				printTank(&t1);
+				t1.moved = 0;
+			}
+			if(t2.moved){
+				printTank(&t2);
+				t2.moved = 0;
+			}
+			break;
 	}
 	
 	return state;

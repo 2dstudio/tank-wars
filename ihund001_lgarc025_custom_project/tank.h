@@ -20,6 +20,9 @@
 #define INITIAL_HEALTH 5
 #define INITIAL_BULLET_COUNT 5 
 
+#define NORMAL_COLOR
+#define HIT_COLOR
+
 typedef struct _tank {
 	int x;
 	int y;
@@ -33,6 +36,8 @@ typedef struct _tank {
 	int bullet_height;
 	int bullet_width;
 	int bullet_count;
+	int hit;
+	int moved;
 } tank;
 
 typedef struct _bullet {
@@ -77,6 +82,8 @@ void initTank(tank * t, int x, int y, char direction){
 	t->health = INITIAL_HEALTH;
 	t->bullet_count = INITIAL_BULLET_COUNT;
 	t->tank_direction = direction;
+	t->hit = 0;
+	t->moved = 0;
 }
 
 void initShot(const tank * t,bullet * s){
