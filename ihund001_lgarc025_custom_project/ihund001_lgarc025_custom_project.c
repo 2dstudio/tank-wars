@@ -34,7 +34,7 @@
 #define TANK_MOVE_RATE 5
 
 
-#define NUM_TASKS 12
+#define NUM_TASKS 13
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
@@ -71,6 +71,10 @@ int T2_SIC_tick(int state);
 
 enum T2_Movement_Input_Controller_States{T2_MIC_Start, T2_MIC_Process};
 int T2_MIC_tick(int state);
+
+// Tank 2 Hit Handler;
+enum T2_Hit_Handler_States{T2_HH_Start, T2_HH_Wait, T2_HH_LOW, T2_HH_HIGH};
+int T2_HH_tick(int state);
 
 // Tank mover
 enum Tank_Movement_States{TM_Start, TM_Process};
@@ -164,6 +168,11 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &T1_HH_tick;
+	++i;
+	tasks[i].state = T2_HH_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &T2_HH_tick;
 	++i;
 	tasks[i].state = TDH_Start;
 	tasks[i].period = display_refresh_rate;
@@ -481,7 +490,6 @@ int T1_HH_tick(int state){
 			
 		case T1_HH_Wait:
 			if(t1.hit == 1){
-				PORTC = 0xFF;
 				state = T1_HH_HIGH;
 				t1.hit = 0;
 				count_int = 0;
@@ -517,6 +525,58 @@ int T1_HH_tick(int state){
 					state = T1_HH_HIGH;
 			}
 			break;	
+	}
+	
+	return state;
+}
+
+int T2_HH_tick(int state){
+	
+	static int flashes = 0;
+	static int count_int = 0;
+	
+	switch(state){
+		case T2_HH_Start:
+		state = T2_HH_Wait;
+		break;
+		
+		case T2_HH_Wait:
+		if(t2.hit == 1){
+			state = T2_HH_HIGH;
+			t2.hit = 0;
+			count_int = 0;
+		}
+		break;
+		
+		case T2_HH_HIGH:
+		++count_int;
+		if(count_int == 1){
+			t2.color = HIT_COLOR;
+			t2.moved = 1;
+		}
+		else if(count_int == 10){
+			count_int = 0;
+			state = T2_HH_LOW;
+		}
+		break;
+		
+		case T2_HH_LOW:
+		++count_int;
+		if(count_int == 1){
+			t2.color = NORMAL_COLOR;
+			t2.moved = 1;
+		}
+		else if(count_int == 10){
+			++flashes;
+			count_int = 0;
+			if(flashes == 3){
+				flashes = 0;
+				state = T2_HH_Wait;
+			}
+			else
+			state = T2_HH_HIGH;
+		}
+		break;
 	}
 	
 	return state;
