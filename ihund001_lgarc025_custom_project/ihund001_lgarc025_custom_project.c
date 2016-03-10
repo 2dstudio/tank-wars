@@ -758,6 +758,9 @@ int GD_tick(int state){
 }
 
 void Initialise_Game(){
+	//To-Do shots_arr and powerup_arr cleanup here
+	
+	
 	for(int i=0; i<NUM_TASKS; ++i){
 		tasks[i].state = tasks[i].startState;
 	}
