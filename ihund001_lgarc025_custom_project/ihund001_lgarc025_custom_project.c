@@ -104,6 +104,7 @@ void powerup_generator();
 void powerup_cleaner();
 void detect_power_up_gain();
 void Initialise_Game();
+void game_over(char *);
 
 int main(void)
 {
@@ -193,6 +194,8 @@ int main(void)
 	fillScreen(0xFFFF);
 	
 	Initialise_Game();
+	
+	game_over("T2 won");
 	
 	while(1)
 	{	
@@ -729,9 +732,13 @@ void kill_all_tasks(){
 	}
 }
 
-void game_over(const char * output){
+void game_over(char * output){
 	kill_all_tasks();
 	fillScreen(0xFFFF);
+	drawString(80, 80, output, 0X0000, 4);
+	drawString(80, 160, "Press 2", 0X0000, 4);
+	drawString(110, 200, "To", 0X0000, 4);
+	drawString(80, 240, "Restart", 0X0000, 4);
 }
 
 int GD_tick(int state){
