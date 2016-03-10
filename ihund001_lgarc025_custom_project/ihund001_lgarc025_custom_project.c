@@ -36,7 +36,7 @@
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
-// State Input Handler Tasks States
+// Tank Input Handler Tasks States
 enum Left_Rotation_Input_Controller_States{LRIC_Start, LRIC_Wait, LRIC_Hold};
 enum Right_Rotation_Input_Controller_States{RRIC_Start, RRIC_Wait, RRIC_Hold};
 enum Shot_Input_Controller_States{SIC_Start, SIC_Wait, SIC_Hold};
@@ -54,17 +54,15 @@ int T2_RRIC_tick(int state);
 int T2_SIC_tick(int state);
 int T2_MIC_tick(int state);
 
+
+// Tank Flasher States
+enum Tank_Flasher_States{Flasher_Start, Flasher_Wait, Flasher_LOW, Flasher_HIGH};
+int T1_Flasher_tick(int state);
+int T2_Flasher_tick(int state);
+
 // Shots Propagator
 enum Shot_Movement_Controller_States{SMC_Start, SMC_Process};
 int SMC_tick(int state);
-
-// Tank 1 Hit Handler;
-enum T1_Hit_Handler_States{T1_HH_Start, T1_HH_Wait, T1_HH_LOW, T1_HH_HIGH};
-int T1_HH_tick(int state);
-
-// Tank 2 Hit Handler;
-enum T2_Hit_Handler_States{T2_HH_Start, T2_HH_Wait, T2_HH_LOW, T2_HH_HIGH};
-int T2_HH_tick(int state);
 
 // Tank mover
 enum Tank_Movement_States{TM_Start, TM_Process};
@@ -154,15 +152,15 @@ int main(void)
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &TM_tick;
 	++i;
-	tasks[i].state = T1_HH_Start;
+	tasks[i].state = Flasher_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &T1_HH_tick;
+	tasks[i].TickFct = &T1_Flasher_tick;
 	++i;
-	tasks[i].state = T2_HH_Start;
+	tasks[i].state = Flasher_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &T2_HH_tick;
+	tasks[i].TickFct = &T2_Flasher_tick;
 	++i;
 	tasks[i].state = TDH_Start;
 	tasks[i].period = display_refresh_rate;
@@ -468,25 +466,25 @@ int TDH_tick(int state){
 	return state;
 }
 
-int T1_HH_tick(int state){
+int T1_Flasher_tick(int state){
 	
 	static int flashes = 0;
 	static int count_int = 0;
 	
 	switch(state){
-		case T1_HH_Start:
-			state = T1_HH_Wait;
+		case Flasher_Start:
+			state = Flasher_Wait;
 			break;
 			
-		case T1_HH_Wait:
+		case Flasher_Wait:
 			if(t1.flash == 1){
-				state = T1_HH_HIGH;
+				state = Flasher_HIGH;
 				t1.flash = 0;
 				count_int = 0;
 			}
 			break;
 		
-		case T1_HH_HIGH:
+		case Flasher_HIGH:
 			++count_int;
 			if(count_int == 1){
 				t1.color = HIT_COLOR;
@@ -494,11 +492,11 @@ int T1_HH_tick(int state){
 			}
 			else if(count_int == 10){
 				count_int = 0;
-				state = T1_HH_LOW;
+				state = Flasher_LOW;
 			}
 			break;
 			
-		case T1_HH_LOW:
+		case Flasher_LOW:
 			++count_int;
 			if(count_int == 1){
 				t1.color = NORMAL_COLOR;
@@ -509,10 +507,10 @@ int T1_HH_tick(int state){
 				count_int = 0;
 				if(flashes == 3){
 					flashes = 0;
-					state = T1_HH_Wait;
+					state = Flasher_Wait;
 				}
 				else
-					state = T1_HH_HIGH;
+					state = Flasher_HIGH;
 			}
 			break;	
 	}
@@ -520,25 +518,25 @@ int T1_HH_tick(int state){
 	return state;
 }
 
-int T2_HH_tick(int state){
+int T2_Flasher_tick(int state){
 	
 	static int flashes = 0;
 	static int count_int = 0;
 	
 	switch(state){
-		case T2_HH_Start:
-		state = T2_HH_Wait;
+		case Flasher_Start:
+		state = Flasher_Wait;
 		break;
 		
-		case T2_HH_Wait:
+		case Flasher_Wait:
 		if(t2.flash == 1){
-			state = T2_HH_HIGH;
+			state = Flasher_HIGH;
 			t2.flash = 0;
 			count_int = 0;
 		}
 		break;
 		
-		case T2_HH_HIGH:
+		case Flasher_HIGH:
 		++count_int;
 		if(count_int == 1){
 			t2.color = HIT_COLOR;
@@ -546,11 +544,11 @@ int T2_HH_tick(int state){
 		}
 		else if(count_int == 10){
 			count_int = 0;
-			state = T2_HH_LOW;
+			state = Flasher_LOW;
 		}
 		break;
 		
-		case T2_HH_LOW:
+		case Flasher_LOW:
 		++count_int;
 		if(count_int == 1){
 			t2.color = NORMAL_COLOR;
@@ -561,10 +559,10 @@ int T2_HH_tick(int state){
 			count_int = 0;
 			if(flashes == 3){
 				flashes = 0;
-				state = T2_HH_Wait;
+				state = Flasher_Wait;
 			}
 			else
-			state = T2_HH_HIGH;
+			state = Flasher_HIGH;
 		}
 		break;
 	}
