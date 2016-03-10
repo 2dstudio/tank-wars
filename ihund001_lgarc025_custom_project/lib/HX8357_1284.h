@@ -231,7 +231,7 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color) {
 	}
 }
 // draw a character
-void drawChar(uint8_t x, uint8_t y, char c, uint16_t color, uint8_t size) {
+void drawChar(uint16_t x, uint16_t y, char c, uint16_t color, uint8_t size) {
 	for (uint8_t i =0; i<5; i++ ) {
 		uint8_t line = pgm_read_byte(font+(c*5)+i);
 		for (uint8_t j = 0; j<8; j++) {
@@ -247,7 +247,7 @@ void drawChar(uint8_t x, uint8_t y, char c, uint16_t color, uint8_t size) {
 	}
 }
 
-void drawString(uint8_t x, uint8_t y, char *c, uint16_t color, uint8_t size) {
+void drawString(uint16_t x, uint16_t y, char *c, uint16_t color, uint8_t size) {
 	while (c[0] != 0) {
 		drawChar(x, y, c[0], color, size);
 		x += size*6;
