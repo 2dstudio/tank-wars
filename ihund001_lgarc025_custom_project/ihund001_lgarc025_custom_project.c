@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "lib\HX8357_1284.h"
 #include "tank.h"
@@ -32,7 +33,7 @@
 #define T2_SHOT_BIT 0
 
 
-#define NUM_TASKS 11
+#define NUM_TASKS 12
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
@@ -61,6 +62,11 @@ int T1_Flasher_tick(int state);
 int T2_Flasher_tick(int state);
 
 
+// PowerUp Generator
+enum Powerup_Gen_States{PG_Start, PG_Process};
+int PG_tick(int state);
+
+
 // Game Engine
 enum Game_Engine{GE_Start, GE_Process};
 int GE_tick(int state);
@@ -84,6 +90,7 @@ powerup* powerup_arr[MAX_CONCURRENT_POWERUPS];
 // Helper functions
 void game_engine_move_tanks_helper();
 void refresh_tanks();
+void powerup_controller();
 
 int main(void)
 {
@@ -93,9 +100,11 @@ int main(void)
 	
 	unsigned int display_refresh_rate = 20;
 	unsigned int input_rate = 40;
-	unsigned long TimePeriodGCD = 20;
+	unsigned int powerup_rate = 3000;
+	unsigned int TimePeriodGCD = 20;
 	
-	memset(shots_arr, 0, 4* sizeof(bullet *));
+	memset(shots_arr, 0, MAX_CONCURRENT_SHOTS* sizeof(bullet *));
+	memset(powerup_arr, 0, MAX_CONCURRENT_POWERUPS* sizeof(powerup *));
 	memset(t1_controls, 0, 6* sizeof(int));
 	memset(t2_controls, 0, 6* sizeof(int));
 	
@@ -149,6 +158,11 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &T2_Flasher_tick;
+	++i;
+	tasks[i].state = PG_Start;
+	tasks[i].period = powerup_rate;
+	tasks[i].elapsedTime = powerup_rate;
+	tasks[i].TickFct = &PG_tick;
 	++i;
 	tasks[i].state = GE_Start;
 	tasks[i].period = display_refresh_rate;
@@ -497,6 +511,21 @@ int T2_Flasher_tick(int state){
 	return state;
 }
 
+int PG_tick(int state){
+	switch(state){
+		case PG_Start:
+			state = PG_Process;
+			break;
+	}
+	
+	switch(state){
+		case PG_Process:
+			powerup_controller();
+			break;
+	}
+	
+	return state;
+}
 
 int GE_tick(int state){
 	switch(state){
@@ -515,8 +544,9 @@ int GE_tick(int state){
 			
 			// Todo-Check if tank got power up
 	
+	
 			// Redisplay Tanks if needed
-			refresh_tanks();
+			refresh_tanks();		
 			
 			break;
 	}
@@ -541,5 +571,37 @@ void refresh_tanks(){
 	if(t2.refresh){
 		printTank(&t2);
 		t2.refresh = 0;
+	}
+}
+
+void getEmptySpot(int *x, int *y){
+	*x = 200;
+	*y = 200;
+};
+
+powerup* generatePowerUp(char type){
+	int x=0, y=0;
+	getEmptySpot(&x,&y);
+	powerup * p = malloc(sizeof(powerup));
+	initPowerUp(p, x, y, type );
+	return p;
+}
+
+powerup * generateRandomPowerUp(){
+	//int r = rand()%4;
+	return generatePowerUp('I');
+}
+
+void powerup_controller(){
+	//Loop to generate power ups
+	for (int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
+		if(powerup_arr[i]==NULL){
+			//generate_powerup_here
+			powerup_arr[i] = generateRandomPowerUp();
+			if(powerup_arr[i]!=NULL){
+				printPowerUp(powerup_arr[i]);
+				return;
+			}
+		}
 	}
 }

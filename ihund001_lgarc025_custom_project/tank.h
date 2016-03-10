@@ -16,6 +16,9 @@
 #define SCREEN_Y_MAX 480
 #define SCREEN_Y_MIN 0
 
+#define POWERUP_HEIGHT 20
+#define POWERUP_WIDTH 20
+
 #define MAX_CONCURRENT_SHOTS 4
 #define MAX_CONCURRENT_POWERUPS 2
 
@@ -479,4 +482,22 @@ void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
 		*cannon_y = t->y + cannon_offset;
 	}
 }
+
+void colorPowerUp(const powerup *p, unsigned int color){
+	fillRect(p->x, p->y, POWERUP_WIDTH, POWERUP_HEIGHT, color);
+}
+
+void clearPowerUp(const powerup* p){
+	colorPowerUp(p, 0xFFFF);
+}
+
+void printPowerUp(const powerup* p){
+	if(p->type == 'H')
+		colorPowerUp(p, 0x07e0);
+	else if(p->type == 'B')
+		colorPowerUp(p, 0xF800);
+	else if(p->type == 'I')
+		colorPowerUp(p, 0xFFE0);
+}
+
 #endif
