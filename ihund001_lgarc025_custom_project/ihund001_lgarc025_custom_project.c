@@ -605,6 +605,17 @@ int PG_tick(int state){
 	return state;
 }
 
+void decay_power_ups(){
+	if(t1.super_speed > 0)
+		--t1.super_speed;
+	if(t1.fast_reload > 0)
+		--t1.fast_reload;
+	if(t2.super_speed > 0)
+		--t2.super_speed;
+	if(t2.fast_reload > 0)
+		--t2.fast_reload;
+}
+
 int GE_tick(int state){
 	switch(state){
 		case GE_Start:
@@ -620,8 +631,11 @@ int GE_tick(int state){
 			// Move tanks
 			game_engine_move_tanks_helper();
 			
-			// Todo-Apply power up
+			// Apply power up
 			detect_power_up_gain();
+			
+			// Decay Power ups
+			decay_power_ups();
 	
 			// Redisplay Tanks if needed
 			refresh_tanks();		
