@@ -523,7 +523,7 @@ int PG_tick(int state){
 	switch(state){
 		case PG_Process:
 			//if(rand()%3 == 0)
-			//	powerup_generator();
+				powerup_generator();
 			//powerup_cleaner();
 			break;
 	}
@@ -541,7 +541,7 @@ int GE_tick(int state){
 	switch(state){
 		case GE_Process:
 			// Move bullets
-			moveAllShots(shots_arr, &t1, &t2);
+			moveAllShots(shots_arr, &t1, &t2, powerup_arr);
 			
 			// Move tanks
 			game_engine_move_tanks_helper();
@@ -621,8 +621,11 @@ int powerUpCollides(const powerup * p){
 }
 
 powerup* generateRandomPowerUp(){
-	int x = rand()%(SCREEN_X_MAX - POWERUP_WIDTH);
-	int y = rand()%(SCREEN_Y_MAX - POWERUP_HEIGHT);
+	//int x = rand()%(SCREEN_X_MAX - POWERUP_WIDTH);
+	//int y = rand()%(SCREEN_Y_MAX - POWERUP_HEIGHT);
+	int x = 100;
+	int y = 200;
+	
 	int tr = rand()%3;
 	char type;
 	switch(tr){

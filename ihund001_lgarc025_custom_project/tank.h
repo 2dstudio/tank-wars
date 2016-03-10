@@ -20,7 +20,7 @@
 #define POWERUP_WIDTH 20
 
 #define MAX_CONCURRENT_SHOTS 4
-#define MAX_CONCURRENT_POWERUPS 2
+#define MAX_CONCURRENT_POWERUPS 1
 #define VALID_POWERUP_TRIES 2
 
 #define INITIAL_HEALTH 5
@@ -82,6 +82,7 @@ int tankInBounds(const tank *t);
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
 void clearTank(const tank * t);
 void printTank(const tank * t);
+void clearPowerUp(const powerup* p);
 
 void initPowerUp(powerup * power, int x, int y, char type){
 	power->x = x;
@@ -431,7 +432,28 @@ int shotHitTank(const bullet * s, tank * t1, tank * t2){
 	return 0;
 }
 
-int moveSingleShot(bullet * s, tank * t1, tank *t2){
+int shotHitPowerUp(bullet * s, powerup * powerup_arr[]){
+	window powerup_window, bullet_window;
+	
+	getBulletWindow(s, &bullet_window);
+	
+	//Check if bullet collides with a powerup
+	for(int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
+		if(powerup_arr[i]!=NULL){
+			getPowerUpWindow(powerup_arr[i], &powerup_window);
+			if(windowsCollide(&powerup_window, &bullet_window)){
+				clearPowerUp(powerup_arr[i]);
+				free(powerup_arr[i]);
+				powerup_arr[i] = NULL;
+				return 1;
+			}
+		}
+	}
+	
+	return 0;
+}
+
+int moveSingleShot(bullet * s, tank * t1, tank *t2, powerup* powerup_arr[]){
 	if(s->bullet_direction == 'N')
 		s->y += s->bullet_speed;
 	else if(s->bullet_direction == 'E')
@@ -445,6 +467,9 @@ int moveSingleShot(bullet * s, tank * t1, tank *t2){
 		return 0;
 	
 	if(shotHitTank(s, t1, t2))
+		return 0;
+		
+	if(shotHitPowerUp(s, powerup_arr))
 		return 0;
 		
 	return 1;
@@ -466,11 +491,11 @@ void deleteShot(bullet * s){
 	free(s);
 }
 
-void moveAllShots(bullet * shots_arr[], tank * t1, tank *t2){
+void moveAllShots(bullet * shots_arr[], tank * t1, tank *t2, powerup* powerup_arr[]){
 	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
 		if(shots_arr[i] != NULL){
 			clearShot(shots_arr[i]);
-			if(moveSingleShot(shots_arr[i], t1, t2))
+			if(moveSingleShot(shots_arr[i], t1, t2, powerup_arr))
 				printShot(shots_arr[i]);
 			else{
 				deleteShot(shots_arr[i]);
