@@ -214,16 +214,24 @@ int main(void)
 	}
 }
 
+int getTankSpeed(const tank * t){
+	if(t->super_speed > 0){
+		return t1.tank_speed * 3;
+	}	
+	else
+		return t1.tank_speed;
+}
+
 void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int right, int lr, int rr){
 	int moved = t1->refresh;
 	if(up && !down)
-		moved |= moveTank(t1, t2, 0, t1->tank_speed);
+		moved |= moveTank(t1, t2, 0, getTankSpeed(t1));
 	else if(down && !up)
-		moved |= moveTank(t1, t2, 0, -t1->tank_speed);
+		moved |= moveTank(t1, t2, 0, -getTankSpeed(t1));
 	if(left && !right)
-		moved |= moveTank(t1, t2, t1->tank_speed, 0);
+		moved |= moveTank(t1, t2, getTankSpeed(t1), 0);
 	else if(right && !left)
-		moved |= moveTank(t1, t2, -t1->tank_speed, 0);
+		moved |= moveTank(t1, t2, -getTankSpeed(t1), 0);
 	if(lr && !rr)
 		moved |= rotateTankLeft(t1, t2);
 	else if(rr && !lr)
@@ -648,13 +656,13 @@ int GE_tick(int state){
 
 void applyPowerUp(powerup * p, tank * t){
 	if(p->type == 'H'){
-		t->health +=100;
+		t->health += 100;
 	}
 	else if(p->type == 'B'){
-		t->super_speed = 300;
+		t->fast_reload = 1000;
 	}
 	else {
-		t->fast_reload = 300;
+		t->super_speed = 1000;
 	}
 }
 
@@ -759,7 +767,8 @@ powerup* generateRandomPowerUp(){
 	int x = 100;
 	int y = 200;
 	
-	int tr = rand()%3;
+	//int tr = rand()%3;
+	int tr = 2;
 	char type;
 	switch(tr){
 		case 0:
