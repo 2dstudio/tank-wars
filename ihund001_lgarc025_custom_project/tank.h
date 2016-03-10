@@ -23,8 +23,9 @@
 #define MAX_CONCURRENT_POWERUPS 1
 #define VALID_POWERUP_TRIES 2
 
-#define INITIAL_HEALTH 5
-#define INITIAL_BULLET_COUNT 5 
+#define INITIAL_HEALTH 100
+#define DEFAULT_RELOAD_TIME 5
+#define DEFAULT_BULLET_STRENGTH 20 
 
 #define NORMAL_COLOR 0x0000
 #define HIT_COLOR 0xF800
@@ -45,7 +46,9 @@ typedef struct _tank {
 	int bullet_speed;
 	int bullet_height;
 	int bullet_width;
-	int bullet_count;
+	int bullet_strength;
+	int reload_time;
+	
 	int hit;
 	int flash;
 	int refresh;
@@ -60,6 +63,7 @@ typedef struct _bullet {
 	int bullet_width;
 	unsigned int bullet_speed;
 	char bullet_direction;
+	int bullet_strength;
 } bullet;
 
 typedef struct _window {
@@ -116,9 +120,9 @@ void initTank(tank * t, int x, int y, char direction){
 	t->bullet_width = MACRO_BULLET_WIDTH;
 	t->health = INITIAL_HEALTH;
 	t->tank_speed = MACRO_TANK_MOVE_RATE;
-	t->bullet_count = INITIAL_BULLET_COUNT;
+	t->bullet_strength = DEFAULT_BULLET_STRENGTH;
+	t->reload_time = DEFAULT_RELOAD_TIME;
 	t->tank_direction = direction;
-	
 	t->flash = 0;
 	t->hit = 0;
 	t->refresh = 0;
@@ -132,6 +136,7 @@ void initShot(const tank * t,bullet * s){
 	s->bullet_width = t->bullet_width;
 	s->bullet_speed = t->bullet_speed;
 	s->bullet_direction = t->tank_direction;
+	s->bullet_strength = t->bullet_strength;
 }
 
 bullet * createShot(const tank * t){
