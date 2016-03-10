@@ -60,6 +60,11 @@ enum Tank_Flasher_States{Flasher_Start, Flasher_Wait, Flasher_LOW, Flasher_HIGH}
 int T1_Flasher_tick(int state);
 int T2_Flasher_tick(int state);
 
+
+// Game Engine
+enum Game_Engine{GE_Start, GE_Process};
+int GE_tick(int state);
+
 // Shots Propagator
 enum Shot_Movement_Controller_States{SMC_Start, SMC_Process};
 int SMC_tick(int state);
@@ -102,11 +107,6 @@ int main(void)
 	memset(t2_controls, 0, 6* sizeof(int));
 	
 	unsigned char i = 0;
-	tasks[i].state = SMC_Start;
-	tasks[i].period = display_refresh_rate;
-	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &SMC_tick;
-	++i;
 	tasks[i].state = MIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
@@ -147,11 +147,6 @@ int main(void)
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T2_SIC_tick;
 	++i;
-	tasks[i].state = TM_Start;
-	tasks[i].period = display_refresh_rate;
-	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &TM_tick;
-	++i;
 	tasks[i].state = Flasher_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
@@ -161,6 +156,21 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &T2_Flasher_tick;
+	++i;
+	tasks[i].state = GE_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &GE_tick;
+	++i;
+	tasks[i].state = TM_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &TM_tick;
+	++i;
+	tasks[i].state = SMC_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &SMC_tick;
 	++i;
 	tasks[i].state = TDH_Start;
 	tasks[i].period = display_refresh_rate;
