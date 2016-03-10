@@ -28,7 +28,9 @@
 
 #define NORMAL_COLOR 0x0000
 #define HIT_COLOR 0xF800
-
+#define HEALTH_POWER_UP_COLOR 0x07E0
+#define SUPER_BULLET_POWER_UP_COLOR 0xF800
+#define GOD_MODE_POWER_UP_COLOR 0xFFE0
 
 typedef struct _tank {
 	int x;
@@ -48,6 +50,7 @@ typedef struct _tank {
 	int flash;
 	int refresh;
 	int color;
+	int flash_color;
 } tank;
 
 typedef struct _bullet {
@@ -71,6 +74,7 @@ typedef struct _powerup {
 	int y;
 	char type;
 	int age;
+	int color;
 } powerup;
 
 void colorTank(const tank * t, unsigned int color);
@@ -84,6 +88,12 @@ void initPowerUp(powerup * power, int x, int y, char type){
 	power->y = y;
 	power->type = type;
 	power->age = 0;
+	if(type == 'H')
+		power->color = 0x07e0;
+	else if(type == 'B')
+		power->color = 0xF800;
+	else
+		power->color = 0xFFE0;
 }
 
 void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
@@ -506,12 +516,7 @@ void clearPowerUp(const powerup* p){
 }
 
 void printPowerUp(const powerup* p){
-	if(p->type == 'H')
-		colorPowerUp(p, 0x07e0);
-	else if(p->type == 'B')
-		colorPowerUp(p, 0xF800);
-	else if(p->type == 'I')
-		colorPowerUp(p, 0xFFE0);
+	colorPowerUp(p, p->color);
 }
 
 #endif
