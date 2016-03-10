@@ -32,6 +32,8 @@
 #define T2_ROTATE_RIGHT_BIT 6
 #define T2_SHOT_BIT 0
 
+#define GAME_RESET_BIT 7
+
 #define DEAD_STATE 99
 
 #define NUM_TASKS 13
@@ -75,7 +77,7 @@ int GE_tick(int state);
 
 
 // Game Decider
-enum GD_States{GD_Start, GD_Process};
+enum GD_States{GD_Start, GD_Speculate, GD_Decided};
 int GD_tick(int state);
 
 
@@ -734,24 +736,34 @@ void game_over(const char * output){
 
 int GD_tick(int state){
 	
-	switch(state){
-		case GD_Start:
-			state = GD_Process;
-			break;
-	}
+	unsigned char us_pina = ~PINA;
+	unsigned char us_pind = ~PIND;
+	unsigned char reset_t1 = GetBit(us_pina, GAME_RESET_BIT);
+	unsigned char reset_t2 = GetBit(us_pind, GAME_RESET_BIT);
 	
 	switch(state){
-		case GD_Process:
+		case GD_Start:
+			state = GD_Speculate;
+			break;
+		case GD_Speculate:
 			if(t1.health <= 0 && t2.health > 0){
-				game_over("T2 won");
+				game_over("T2 won");	
+				state = GD_Decided;	
 			}
 			else if(t2.health <= 0 && t1.health > 0){
 				game_over("T1 won");
+				state = GD_Decided;
 			}
 			else if(t1.health <= 0 && t2.health <=0){
 				game_over("Draw");
+				state = GD_Decided;
 			}
 			break;
+		case GD_Decided:
+			if(reset_t1 || reset_t2){
+				Initialise_Game();
+				state = GD_Start;
+			}
 	}
 	
 	return state;
