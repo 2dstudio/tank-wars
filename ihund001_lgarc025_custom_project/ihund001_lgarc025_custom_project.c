@@ -619,9 +619,9 @@ int PG_tick(int state){
 	
 	switch(state){
 		case PG_Process:
-			//if(rand()%3 == 0)
+			if(rand()%2 == 0)
 				powerup_generator();
-			//powerup_cleaner();
+			powerup_cleaner();
 			break;
 	}
 	
@@ -777,13 +777,13 @@ int powerUpCollides(const powerup * p){
 }
 
 powerup* generateRandomPowerUp(){
-	//int x = rand()%(SCREEN_X_MAX - POWERUP_WIDTH);
-	//int y = rand()%(SCREEN_Y_MAX - POWERUP_HEIGHT);
-	int x = 100;
-	int y = 200;
+	int x = rand()%(SCREEN_X_MAX - POWERUP_WIDTH);
+	int y = rand()%(SCREEN_Y_MAX - POWERUP_HEIGHT);
+	//int x = 100;
+	//int y = 200;
 	
-	//int tr = rand()%3;
-	int tr = 1;
+	int tr = rand()%3;
+	//int tr = 0;
 	char type;
 	switch(tr){
 		case 0:
