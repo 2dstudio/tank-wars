@@ -216,10 +216,10 @@ int main(void)
 
 int getTankSpeed(const tank * t){
 	if(t->super_speed > 0){
-		return t1.tank_speed * 3;
+		return t->tank_speed * 3;
 	}	
 	else
-		return t1.tank_speed;
+		return t->tank_speed;
 }
 
 void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int right, int lr, int rr){
@@ -291,6 +291,22 @@ int T2_MIC_tick(int state){
 	return state;
 }
 
+int getReloadTime(const tank * t){
+	if(t->fast_reload > 0){
+		return 0;
+	}
+	else
+		return t->reload_time;
+}
+
+int getLoadTime(const tank * t){
+	if(t->fast_reload > 0){
+		return 20;
+	}
+	else
+		return t->load_time;
+}
+
 int T1_SIC_tick(int state){
 	static int loads = 0;
 	static int count = 0;
@@ -321,14 +337,14 @@ int T1_SIC_tick(int state){
 			break;
 		case SIC_Reload:
 			++count;
-			if(count == t1.reload_time){
+			if(count >= 1 + getReloadTime(&t1)){
 				count = 0;
 				state = SIC_Load;
 			}
 			break;
 		case SIC_Load:
 			++count;
-			if(count == t1.load_time){
+			if(count >= 1 + getLoadTime(&t1)){
 				count = 0;
 				state = SIC_Hold;
 			}
@@ -373,14 +389,14 @@ int T2_SIC_tick(int state){
 			break;		
 		case SIC_Reload:
 			++count;
-			if(count == t1.reload_time){
+			if(count >= 1 + getReloadTime(&t2)){
 				count = 0;
 				state = SIC_Load;
 			}
 			break;
 		case SIC_Load:
 			++count;
-			if(count == t1.load_time){
+			if(count >= 1 + getLoadTime(&t2)){
 				count = 0;
 				state = SIC_Hold;
 			}
@@ -392,7 +408,6 @@ int T2_SIC_tick(int state){
 			break;
 	}
 	
-	//PORTC = output_pc;
 	return state;
 }
 
@@ -768,7 +783,7 @@ powerup* generateRandomPowerUp(){
 	int y = 200;
 	
 	//int tr = rand()%3;
-	int tr = 2;
+	int tr = 1;
 	char type;
 	switch(tr){
 		case 0:
