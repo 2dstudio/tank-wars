@@ -577,14 +577,62 @@ void refresh_tanks(){
 	}
 }
 
-void getEmptySpot(int *x, int *y){
-	*x = 200;
-	*y = 200;
+int powerUpBoxCollides(int x, int y){
+	window bullet_window, t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
+	window powerup_window;
+	
+	getPowerUpWindow(x, y, &powerup_window);
+	
+	// Check if powerUp collides with a tank;
+	getTankBodyWindow(&t1, &t1_body_window);
+	getTankCannonWindow(&t1, &t1_cannon_window);
+	getTankBodyWindow(&t2, &t2_body_window);
+	getTankCannonWindow(&t2, &t2_cannon_window);
+	
+	if(windowsCollide(&powerup_window,&t1_body_window) || windowsCollide(&powerup_window,&t1_cannon_window)){
+		return 1;
+	}
+	if(windowsCollide(&powerup_window,&t2_body_window) || windowsCollide(&powerup_window,&t2_cannon_window)){
+		return 2;
+	}
+	
+	//Check if powerUp collides with a bullet
+	for(int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
+		if(shots_arr[i]!=NULL){
+			getBulletWindow(shots_arr[i], &bullet_window);
+			if(windowsCollide(&powerup_window, &bullet_window)){
+				return 3;	
+			}
+		}
+	}
+	
+	//Check if powerup collides with another powerup
+	/*
+	for(int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
+		if(powerup_arr[i]!=NULL){
+			window powerup_win2;
+			
+		}
+	}*/
+	
+	return 0;
+}
+
+int getEmptySpot(int *x, int *y){
+	*x = 100;
+	*y = 100;
+	if(powerUpBoxCollides(*x, *y))
+		return -1;
+	return 1;
+	// Check if collides and then change pos;
 };
 
 powerup* generatePowerUp(char type){
 	int x=0, y=0;
-	getEmptySpot(&x,&y);
+	int status = getEmptySpot(&x,&y);
+	if(status == -1){
+		return NULL;
+	}
 	powerup * p = malloc(sizeof(powerup));
 	initPowerUp(p, x, y, type );
 	return p;

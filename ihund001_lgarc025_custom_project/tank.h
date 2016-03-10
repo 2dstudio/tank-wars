@@ -265,6 +265,16 @@ void getBulletWindow(const bullet *s, window * bullet_window){
 	initWindow(bullet_window, lower_x, lower_y, upper_x, upper_y);
 }
 
+void getPowerUpWindow(int x, int y, window * powerup_window){
+	int lower_x, lower_y, upper_x, upper_y;
+	
+	lower_x = x;
+	lower_y = y;
+	upper_x = x + POWERUP_WIDTH;
+	upper_y = y + POWERUP_WIDTH;
+	initWindow(powerup_window, lower_x, lower_y, upper_x, upper_y);
+}
+
 int windowInBounds(const window * w){
 	if(w->l_x <SCREEN_X_MIN || w->u_x > SCREEN_X_MAX|| w->l_y < SCREEN_Y_MIN || w->u_y > SCREEN_Y_MAX){
 		return 0;
