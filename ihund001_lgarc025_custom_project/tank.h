@@ -122,6 +122,7 @@ void initTank(tank * t, int x, int y, char direction){
 	t->hit = 0;
 	t->refresh = 0;
 	t->color = NORMAL_COLOR;
+	t->flash_color = NORMAL_COLOR;
 }
 
 void initShot(const tank * t,bullet * s){
@@ -418,11 +419,13 @@ int shotHitTank(const bullet * s, tank * t1, tank * t2){
 	if(windowsCollide(&bullet_window,&t1_body_window) || windowsCollide(&bullet_window,&t1_cannon_window)){
 		t1->hit = 1;
 		t1->flash = 1;
+		t1->flash_color = HIT_COLOR;
 		return 1;
 	}
 	if(windowsCollide(&bullet_window,&t2_body_window) || windowsCollide(&bullet_window,&t2_cannon_window)){
 		t2->hit = 1;
 		t2->flash = 1;
+		t2->flash = HIT_COLOR;
 		return 1;
 	}
 	return 0;

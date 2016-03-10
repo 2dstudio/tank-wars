@@ -431,7 +431,7 @@ int T1_Flasher_tick(int state){
 		case Flasher_HIGH:
 			++count_int;
 			if(count_int == 1){
-				t1.color = HIT_COLOR;
+				t1.color = t1.flash_color;
 				t1.refresh = 1;
 			}
 			else if(count_int == 10){
@@ -482,7 +482,7 @@ int T2_Flasher_tick(int state){
 		case Flasher_HIGH:
 		++count_int;
 		if(count_int == 1){
-			t2.color = HIT_COLOR;
+			t2.color = t2.flash_color;
 			t2.refresh = 1;
 		}
 		else if(count_int == 10){
@@ -522,9 +522,9 @@ int PG_tick(int state){
 	
 	switch(state){
 		case PG_Process:
-			if(rand()%3 == 0)
-				powerup_generator();
-			powerup_cleaner();
+			//if(rand()%3 == 0)
+			//	powerup_generator();
+			//powerup_cleaner();
 			break;
 	}
 	
