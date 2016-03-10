@@ -92,6 +92,7 @@ void game_engine_move_tanks_helper();
 void refresh_tanks();
 void powerup_generator();
 void powerup_cleaner();
+void detect_power_up_gain();
 
 int main(void)
 {
@@ -547,7 +548,7 @@ int GE_tick(int state){
 			game_engine_move_tanks_helper();
 			
 			// Todo-Check if tank got power up
-	
+			detect_power_up_gain();
 	
 			// Redisplay Tanks if needed
 			refresh_tanks();		
@@ -556,6 +557,36 @@ int GE_tick(int state){
 	}
 	
 	return state;
+}
+
+void detect_power_up_gain(){
+	window powerup_window, t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
+	
+	// Check if powerUp collides with a tank;
+	getTankBodyWindow(&t1, &t1_body_window);
+	getTankCannonWindow(&t1, &t1_cannon_window);
+	getTankBodyWindow(&t2, &t2_body_window);
+	getTankCannonWindow(&t2, &t2_cannon_window);
+	
+	for(int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
+		if(powerup_arr[i]!=NULL){
+			getPowerUpWindow(powerup_arr[i], &powerup_window);
+			if(windowsCollide(&powerup_window,&t1_body_window) || windowsCollide(&powerup_window,&t1_cannon_window)){
+				t1.flash = 1;
+				t1.flash_color = powerup_arr[i]->color;
+				clearPowerUp(powerup_arr[i]);
+				free(powerup_arr[i]);
+				powerup_arr[i] = NULL;	
+			}
+			if(windowsCollide(&powerup_window,&t2_body_window) || windowsCollide(&powerup_window,&t2_cannon_window)){
+				t2.flash = 1;
+				t2.flash_color = powerup_arr[i]->color;
+				clearPowerUp(powerup_arr[i]);
+				free(powerup_arr[i]);
+				powerup_arr[i] = NULL;
+			}
+		}
+	}
 }
 
 void game_engine_move_tanks_helper(){
