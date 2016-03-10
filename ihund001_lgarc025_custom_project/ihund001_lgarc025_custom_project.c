@@ -90,17 +90,19 @@ powerup* powerup_arr[MAX_CONCURRENT_POWERUPS];
 // Helper functions
 void game_engine_move_tanks_helper();
 void refresh_tanks();
-void powerup_controller();
+void powerup_generator();
+void powerup_cleaner();
 
 int main(void)
 {
+	
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRD = 0x00; PORTD = 0xFF;
 	DDRC = 0xFF; PORTC = 0x00;
 	
 	unsigned int display_refresh_rate = 20;
 	unsigned int input_rate = 40;
-	unsigned int powerup_rate = 3000;
+	unsigned int powerup_rate = 6000;
 	unsigned int TimePeriodGCD = 20;
 	
 	memset(shots_arr, 0, MAX_CONCURRENT_SHOTS* sizeof(bullet *));
@@ -520,7 +522,8 @@ int PG_tick(int state){
 	
 	switch(state){
 		case PG_Process:
-			powerup_controller();
+			powerup_generator();
+			powerup_cleaner();
 			break;
 	}
 	
@@ -592,7 +595,21 @@ powerup * generateRandomPowerUp(){
 	return generatePowerUp('I');
 }
 
-void powerup_controller(){
+void powerup_cleaner(){
+	//Loop to delete Power ups
+	for (int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
+		if(powerup_arr[i]!=NULL){
+			++powerup_arr[i]->age;
+			if(powerup_arr[i]->age == 3){
+				clearPowerUp(powerup_arr[i]);
+				free(powerup_arr[i]);
+				powerup_arr[i] = NULL;
+			}
+		}
+	}
+}
+
+void powerup_generator(){
 	//Loop to generate power ups
 	for (int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
 		if(powerup_arr[i]==NULL){

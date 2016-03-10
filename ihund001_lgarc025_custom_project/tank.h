@@ -20,7 +20,7 @@
 #define POWERUP_WIDTH 20
 
 #define MAX_CONCURRENT_SHOTS 4
-#define MAX_CONCURRENT_POWERUPS 2
+#define MAX_CONCURRENT_POWERUPS 1
 
 #define INITIAL_HEALTH 5
 #define INITIAL_BULLET_COUNT 5 
@@ -68,6 +68,7 @@ typedef struct _powerup {
 	int x;
 	int y;
 	char type;
+	int age;
 } powerup;
 
 void colorTank(const tank * t, unsigned int color);
@@ -80,6 +81,7 @@ void initPowerUp(powerup * power, int x, int y, char type){
 	power->x = x;
 	power->y = y;
 	power->type = type;
+	power->age = 0;
 }
 
 void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
@@ -488,7 +490,7 @@ void colorPowerUp(const powerup *p, unsigned int color){
 }
 
 void clearPowerUp(const powerup* p){
-	colorPowerUp(p, 0xFFFF);
+	colorPowerUp(p, 0xffff);
 }
 
 void printPowerUp(const powerup* p){
