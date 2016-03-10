@@ -32,7 +32,7 @@
 #define HIT_COLOR 0xF800
 #define HEALTH_POWER_UP_COLOR 0x07E0
 #define SUPER_BULLET_POWER_UP_COLOR 0xF800
-#define GOD_MODE_POWER_UP_COLOR 0xFFE0
+#define SPEED_POWER_UP_COLOR 0xFFE0
 
 typedef struct _tank {
 	int x;
@@ -55,6 +55,10 @@ typedef struct _tank {
 	int refresh;
 	int color;
 	int flash_color;
+	
+	//Powerups
+	int fast_reload;
+	int super_speed;
 } tank;
 
 typedef struct _bullet {
@@ -130,6 +134,9 @@ void initTank(tank * t, int x, int y, char direction){
 	t->refresh = 0;
 	t->color = NORMAL_COLOR;
 	t->flash_color = NORMAL_COLOR;
+	
+	t->fast_reload = 0;
+	t->super_speed = 0;
 }
 
 void initShot(const tank * t,bullet * s){

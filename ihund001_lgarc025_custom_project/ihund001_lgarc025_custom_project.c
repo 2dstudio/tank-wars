@@ -632,6 +632,19 @@ int GE_tick(int state){
 	return state;
 }
 
+void applyPowerUp(powerup * p, tank * t){
+	if(p->type == 'H'){
+		t->health +=100;
+	}
+	else if(p->type == 'B'){
+		t->super_speed = 300;
+	}
+	else {
+		t->fast_reload = 300;
+	}
+}
+
+
 void detect_power_up_gain(){
 	window powerup_window, t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
 	
@@ -645,6 +658,7 @@ void detect_power_up_gain(){
 		if(powerup_arr[i]!=NULL){
 			getPowerUpWindow(powerup_arr[i], &powerup_window);
 			if(windowsCollide(&powerup_window,&t1_body_window) || windowsCollide(&powerup_window,&t1_cannon_window)){
+				applyPowerUp(powerup_arr[i], &t1);
 				t1.flash = 1;
 				t1.flash_color = powerup_arr[i]->color;
 				clearPowerUp(powerup_arr[i]);
@@ -652,6 +666,7 @@ void detect_power_up_gain(){
 				powerup_arr[i] = NULL;	
 			}
 			if(windowsCollide(&powerup_window,&t2_body_window) || windowsCollide(&powerup_window,&t2_cannon_window)){
+				applyPowerUp(powerup_arr[i], &t2);
 				t2.flash = 1;
 				t2.flash_color = powerup_arr[i]->color;
 				clearPowerUp(powerup_arr[i]);
@@ -740,7 +755,7 @@ powerup* generateRandomPowerUp(){
 			type='B';
 			break;
 		case 2:
-			type='I';
+			type='S';
 			break;
 		default:
 			type='H';
