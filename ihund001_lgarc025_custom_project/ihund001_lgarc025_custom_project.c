@@ -31,8 +31,6 @@
 #define T2_ROTATE_RIGHT_BIT 6
 #define T2_SHOT_BIT 0
 
-#define TANK_MOVE_RATE 5
-
 
 #define NUM_TASKS 13
 task tasks[NUM_TASKS];
@@ -210,13 +208,13 @@ int main(void)
 void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int right, int lr, int rr){
 	int moved = 0;
 	if(up && !down)
-		moved |= moveTank(t1, t2, 0, TANK_MOVE_RATE);
+		moved |= moveTank(t1, t2, 0, t1->tank_speed);
 	else if(down && !up)
-		moved |= moveTank(t1, t2, 0, -TANK_MOVE_RATE);
+		moved |= moveTank(t1, t2, 0, -t1->tank_speed);
 	if(left && !right)
-		moved |= moveTank(t1, t2, TANK_MOVE_RATE, 0);
+		moved |= moveTank(t1, t2, t1->tank_speed, 0);
 	else if(right && !left)
-		moved |= moveTank(t1, t2, -TANK_MOVE_RATE, 0);
+		moved |= moveTank(t1, t2, -t1->tank_speed, 0);
 	if(lr && !rr)
 		moved |= rotateTankLeft(t1, t2);
 	else if(rr && !lr)

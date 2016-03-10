@@ -5,6 +5,7 @@
 #define MACRO_TANK_WIDTH 40
 #define MACRO_CANNON_WIDTH 10
 #define MACRO_CANNON_LENGTH 25
+#define MACRO_TANK_MOVE_RATE 5
 
 #define MACRO_BULLET_SPEED 9
 #define MACRO_BULLET_HEIGHT 10
@@ -31,6 +32,7 @@ typedef struct _tank {
 	unsigned int cannon_length;
 	unsigned int cannon_width;
 	char tank_direction;
+	int tank_speed;
 	char health;
 	int bullet_speed;
 	int bullet_height;
@@ -81,6 +83,7 @@ void initTank(tank * t, int x, int y, char direction){
 	t->bullet_height = MACRO_BULLET_HEIGHT;
 	t->bullet_width = MACRO_BULLET_WIDTH;
 	t->health = INITIAL_HEALTH;
+	t->tank_speed = MACRO_TANK_MOVE_RATE;
 	t->bullet_count = INITIAL_BULLET_COUNT;
 	t->tank_direction = direction;
 	t->hit = 0;
