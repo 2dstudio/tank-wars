@@ -59,11 +59,23 @@ typedef struct _window {
 	int u_y;
 } window;
 
+typedef struct _powerup {
+	int x;
+	int y;
+	char type;
+} powerup;
+
 void colorTank(const tank * t, unsigned int color);
 int tankInBounds(const tank *t);
 void getCannonHead(const tank * t, int * cannon_x, int * cannon_y);
 void clearTank(const tank * t);
 void printTank(const tank * t);
+
+void initPowerUp(powerup * power, int x, int y, char type){
+	power->x = x;
+	power->y = y;
+	power->type = type;
+}
 
 void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
 	w->l_x = l_x;
