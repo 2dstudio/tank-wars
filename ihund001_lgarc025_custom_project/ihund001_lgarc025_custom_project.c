@@ -45,7 +45,7 @@ const unsigned short numTasks = NUM_TASKS;
 // Tank Input Handler Tasks States
 enum Left_Rotation_Input_Controller_States{LRIC_Start, LRIC_Wait, LRIC_Hold};
 enum Right_Rotation_Input_Controller_States{RRIC_Start, RRIC_Wait, RRIC_Hold};
-enum Shot_Input_Controller_States{SIC_Start, SIC_Wait, SIC_Hold};
+enum Shot_Input_Controller_States{SIC_Start, SIC_Wait, SIC_Sound_Off, SIC_Hold};
 enum Movement_Input_Controller_States{MIC_Start, MIC_Process};
 
 // Tank 1 Input Handlers
@@ -94,9 +94,13 @@ tank t2;
 
 int t1_controls[6];
 int t2_controls[6];
+int output_pc;
 
 bullet* shots_arr[MAX_CONCURRENT_SHOTS];
 powerup* powerup_arr[MAX_CONCURRENT_POWERUPS];
+
+#define CANNON_BIT 7
+#define SNIPER_BIT 6
 
 // Helper functions
 void game_engine_move_tanks_helper();
@@ -192,7 +196,6 @@ int main(void)
 	
 	SPI_MasterInit();
 	displayInit();
-	fillScreen(0xFFFF);
 	
 	Initialise_Game();
 	
@@ -289,9 +292,17 @@ int T1_SIC_tick(int state){
 			break;
 		case SIC_Wait:
 			if(shoot){
-				makeShot(&t1, shots_arr);
-				state = SIC_Hold;
+				makeShot(&t1, shots_arr);	
+				PORTC = 0x80;
+				//PORTC = 0xFF;
+				SetBit(output_pc, CANNON_BIT, 1);
+				state = SIC_Sound_Off;
 			}
+			break;
+		case SIC_Sound_Off:
+			PORTC = 0x00;
+			//SetBit(output_pc, CANNON_BIT, 0);
+			state = SIC_Hold;
 			break;
 		case SIC_Hold:
 			if(!shoot){
@@ -299,6 +310,8 @@ int T1_SIC_tick(int state){
 			}
 			break;
 	}
+	
+	//PORTC = output_pc;
 	return state;
 }
 
@@ -308,20 +321,30 @@ int T2_SIC_tick(int state){
 	
 	switch(state){
 		case SIC_Start:
-		state = SIC_Wait;
-		break;
-		case SIC_Wait:
-		if(shoot){
-			makeShot(&t2, shots_arr);
-			state = SIC_Hold;
-		}
-		break;
-		case SIC_Hold:
-		if(!shoot){
 			state = SIC_Wait;
-		}
-		break;
+			break;
+		case SIC_Wait:
+			if(shoot){
+				makeShot(&t2, shots_arr);
+				PORTC = 0x80;
+				//PORTC = 0xFF;
+				SetBit(output_pc, CANNON_BIT, 1);
+				state = SIC_Sound_Off;
+			}
+			break;
+		case SIC_Sound_Off:
+			PORTC = 0x00;
+			//SetBit(output_pc, CANNON_BIT, 0);
+			state = SIC_Hold;
+			break;
+		case SIC_Hold:
+			if(!shoot){
+				state = SIC_Wait;
+			}
+			break;
 	}
+	
+	//PORTC = output_pc;
 	return state;
 }
 
@@ -782,6 +805,9 @@ int GD_tick(int state){
 }
 
 void Initialise_Game(){
+	
+	fillScreen(0xFFFF);
+	
 	//To-Do shots_arr and powerup_arr cleanup here
 	
 	
