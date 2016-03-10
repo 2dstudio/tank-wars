@@ -208,6 +208,7 @@ int main(void)
 			}
 			tasks[i].elapsedTime += TimePeriodGCD;
 		}
+		PORTC = output_pc;
 		while(!TimerFlag);
 		TimerFlag = 0;	
 	}
@@ -292,16 +293,13 @@ int T1_SIC_tick(int state){
 			break;
 		case SIC_Wait:
 			if(shoot){
-				makeShot(&t1, shots_arr);	
-				PORTC = 0x80;
-				//PORTC = 0xFF;
-				SetBit(output_pc, CANNON_BIT, 1);
+				makeShot(&t1, shots_arr);
+				output_pc = SetBit(output_pc, CANNON_BIT, 1);
 				state = SIC_Sound_Off;
 			}
 			break;
 		case SIC_Sound_Off:
-			PORTC = 0x00;
-			//SetBit(output_pc, CANNON_BIT, 0);
+			output_pc = SetBit(output_pc, CANNON_BIT, 0);
 			state = SIC_Hold;
 			break;
 		case SIC_Hold:
@@ -311,7 +309,6 @@ int T1_SIC_tick(int state){
 			break;
 	}
 	
-	//PORTC = output_pc;
 	return state;
 }
 
@@ -326,15 +323,12 @@ int T2_SIC_tick(int state){
 		case SIC_Wait:
 			if(shoot){
 				makeShot(&t2, shots_arr);
-				PORTC = 0x80;
-				//PORTC = 0xFF;
-				SetBit(output_pc, CANNON_BIT, 1);
+				output_pc = SetBit(output_pc, CANNON_BIT, 1);
 				state = SIC_Sound_Off;
 			}
 			break;
 		case SIC_Sound_Off:
-			PORTC = 0x00;
-			//SetBit(output_pc, CANNON_BIT, 0);
+			output_pc = SetBit(output_pc, CANNON_BIT, 0);
 			state = SIC_Hold;
 			break;
 		case SIC_Hold:
@@ -805,7 +799,7 @@ int GD_tick(int state){
 }
 
 void Initialise_Game(){
-	
+	output_pc = 0;
 	fillScreen(0xFFFF);
 	
 	//To-Do shots_arr and powerup_arr cleanup here
