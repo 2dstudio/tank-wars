@@ -101,6 +101,7 @@ void refresh_tanks();
 void powerup_generator();
 void powerup_cleaner();
 void detect_power_up_gain();
+void Initialise_Game();
 
 int main(void)
 {
@@ -114,73 +115,68 @@ int main(void)
 	unsigned int powerup_rate = 6000;
 	unsigned int TimePeriodGCD = 20;
 	
-	memset(shots_arr, 0, MAX_CONCURRENT_SHOTS* sizeof(bullet *));
-	memset(powerup_arr, 0, MAX_CONCURRENT_POWERUPS* sizeof(powerup *));
-	memset(t1_controls, 0, 6* sizeof(int));
-	memset(t2_controls, 0, 6* sizeof(int));
-	
 	unsigned char i = 0;
-	tasks[i].state = MIC_Start;
+	tasks[i].startState = MIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T1_MIC_tick;
 	++i;
-	tasks[i].state = LRIC_Start;
+	tasks[i].startState = LRIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T1_LRIC_tick;
 	++i;
-	tasks[i].state = RRIC_Start;
+	tasks[i].startState = RRIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T1_RRIC_tick;
 	++i;
-	tasks[i].state = SIC_Start;
+	tasks[i].startState = SIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T1_SIC_tick;
 	++i;
-	tasks[i].state = MIC_Start;
+	tasks[i].startState = MIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T2_MIC_tick;
 	++i;
-	tasks[i].state = LRIC_Start;
+	tasks[i].startState = LRIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T2_LRIC_tick;
 	++i;
-	tasks[i].state = RRIC_Start;
+	tasks[i].startState = RRIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T2_RRIC_tick;
 	++i;
-	tasks[i].state = SIC_Start;
+	tasks[i].startState = SIC_Start;
 	tasks[i].period = input_rate;
 	tasks[i].elapsedTime = input_rate;
 	tasks[i].TickFct = &T2_SIC_tick;
 	++i;
-	tasks[i].state = Flasher_Start;
+	tasks[i].startState = Flasher_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &T1_Flasher_tick;
 	++i;
-	tasks[i].state = Flasher_Start;
+	tasks[i].startState = Flasher_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &T2_Flasher_tick;
 	++i;
-	tasks[i].state = PG_Start;
+	tasks[i].startState = PG_Start;
 	tasks[i].period = powerup_rate;
 	tasks[i].elapsedTime = powerup_rate;
 	tasks[i].TickFct = &PG_tick;
 	++i;
-	tasks[i].state = GE_Start;
+	tasks[i].startState = GE_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &GE_tick;
 	++i;
-	tasks[i].state = GD_Start;
+	tasks[i].startState = GD_Start;
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &GD_tick;
@@ -194,11 +190,7 @@ int main(void)
 	displayInit();
 	fillScreen(0xFFFF);
 	
-	initTank(&t1, 100, 50, 'N');
-	initTank(&t2, 100, 400, 'S');
-	
-	printTank(&t1);
-	printTank(&t2);
+	Initialise_Game();
 	
 	while(1)
 	{	
@@ -763,4 +755,23 @@ int GD_tick(int state){
 	}
 	
 	return state;
+}
+
+void Initialise_Game(){
+	for(int i=0; i<NUM_TASKS; ++i){
+		tasks[i].state = tasks[i].startState;
+	}
+	
+	
+	memset(shots_arr, 0, MAX_CONCURRENT_SHOTS* sizeof(bullet *));
+	memset(powerup_arr, 0, MAX_CONCURRENT_POWERUPS* sizeof(powerup *));
+	memset(t1_controls, 0, 6* sizeof(int));
+	memset(t2_controls, 0, 6* sizeof(int));
+		
+	
+	initTank(&t1, 100, 50, 'N');
+	initTank(&t2, 100, 400, 'S');
+	
+	printTank(&t1);
+	printTank(&t2);
 }
