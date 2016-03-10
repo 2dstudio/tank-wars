@@ -17,18 +17,20 @@
 #include "task.h"
 #include "utilities.h"
 
+
 #define T1_MOVE_UP_BIT 3
 #define T1_MOVE_DOWN_BIT 1
-#define T1_MOVE_LEFT_BIT 0
-#define T1_MOVE_RIGHT_BIT 2
-#define T1_ROTATE_LEFT_BIT 4
-#define T1_ROTATE_RIGHT_BIT 5
+#define T1_MOVE_LEFT_BIT 2
+#define T1_MOVE_RIGHT_BIT 0
+#define T1_ROTATE_LEFT_BIT 5
+#define T1_ROTATE_RIGHT_BIT 4
 #define T1_SHOT_BIT 6
 
-#define T2_MOVE_UP_BIT 5
-#define T2_MOVE_DOWN_BIT 2
-#define T2_MOVE_LEFT_BIT 1
-#define T2_MOVE_RIGHT_BIT 3
+
+#define T2_MOVE_UP_BIT 2
+#define T2_MOVE_DOWN_BIT 5
+#define T2_MOVE_LEFT_BIT 3
+#define T2_MOVE_RIGHT_BIT 1
 #define T2_ROTATE_LEFT_BIT 4
 #define T2_ROTATE_RIGHT_BIT 6
 #define T2_SHOT_BIT 0
