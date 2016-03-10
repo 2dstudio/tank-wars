@@ -195,7 +195,7 @@ int main(void)
 }
 
 void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int right, int lr, int rr){
-	int moved = t1->moved;
+	int moved = t1->refresh;
 	if(up && !down)
 		moved |= moveTank(t1, t2, 0, t1->tank_speed);
 	else if(down && !up)
@@ -208,7 +208,7 @@ void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int righ
 		moved |= rotateTankLeft(t1, t2);
 	else if(rr && !lr)
 		moved |= rotateTankRight(t1, t2);
-	t1->moved = moved;
+	t1->refresh = moved;
 }
 
 int T1_MIC_tick(int state){
@@ -427,7 +427,7 @@ int T1_Flasher_tick(int state){
 			++count_int;
 			if(count_int == 1){
 				t1.color = HIT_COLOR;
-				t1.moved = 1;
+				t1.refresh = 1;
 			}
 			else if(count_int == 10){
 				count_int = 0;
@@ -439,7 +439,7 @@ int T1_Flasher_tick(int state){
 			++count_int;
 			if(count_int == 1){
 				t1.color = NORMAL_COLOR;
-				t1.moved = 1;
+				t1.refresh = 1;
 			}
 			else if(count_int == 10){
 				++flashes;
@@ -478,7 +478,7 @@ int T2_Flasher_tick(int state){
 		++count_int;
 		if(count_int == 1){
 			t2.color = HIT_COLOR;
-			t2.moved = 1;
+			t2.refresh = 1;
 		}
 		else if(count_int == 10){
 			count_int = 0;
@@ -490,7 +490,7 @@ int T2_Flasher_tick(int state){
 		++count_int;
 		if(count_int == 1){
 			t2.color = NORMAL_COLOR;
-			t2.moved = 1;
+			t2.refresh = 1;
 		}
 		else if(count_int == 10){
 			++flashes;
@@ -545,12 +545,12 @@ void game_engine_move_tanks_helper(){
 }
 
 void refresh_tanks(){
-	if(t1.moved){
+	if(t1.refresh){
 		printTank(&t1);
-		t1.moved = 0;
+		t1.refresh = 0;
 	}
-	if(t2.moved){
+	if(t2.refresh){
 		printTank(&t2);
-		t2.moved = 0;
+		t2.refresh = 0;
 	}
 }

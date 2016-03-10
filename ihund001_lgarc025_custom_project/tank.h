@@ -40,7 +40,7 @@ typedef struct _tank {
 	int bullet_count;
 	int hit;
 	int flash;
-	int moved;
+	int refresh;
 	int color;
 } tank;
 
@@ -102,7 +102,7 @@ void initTank(tank * t, int x, int y, char direction){
 	
 	t->flash = 0;
 	t->hit = 0;
-	t->moved = 0;
+	t->refresh = 0;
 	t->color = NORMAL_COLOR;
 }
 
