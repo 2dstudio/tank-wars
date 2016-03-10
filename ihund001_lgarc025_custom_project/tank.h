@@ -39,6 +39,7 @@ typedef struct _tank {
 	int bullet_width;
 	int bullet_count;
 	int hit;
+	int flash;
 	int moved;
 	int color;
 } tank;
@@ -98,6 +99,8 @@ void initTank(tank * t, int x, int y, char direction){
 	t->tank_speed = MACRO_TANK_MOVE_RATE;
 	t->bullet_count = INITIAL_BULLET_COUNT;
 	t->tank_direction = direction;
+	
+	t->flash = 0;
 	t->hit = 0;
 	t->moved = 0;
 	t->color = NORMAL_COLOR;
@@ -386,10 +389,12 @@ int shotHitTank(const bullet * s, tank * t1, tank * t2){
 	
 	if(windowsCollide(&bullet_window,&t1_body_window) || windowsCollide(&bullet_window,&t1_cannon_window)){
 		t1->hit = 1;
+		t1->flash = 1;
 		return 1;
 	}
 	if(windowsCollide(&bullet_window,&t2_body_window) || windowsCollide(&bullet_window,&t2_cannon_window)){
 		t2->hit = 1;
+		t2->flash = 1;
 		return 1;
 	}
 	return 0;

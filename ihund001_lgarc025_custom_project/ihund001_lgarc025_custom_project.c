@@ -479,9 +479,9 @@ int T1_HH_tick(int state){
 			break;
 			
 		case T1_HH_Wait:
-			if(t1.hit == 1){
+			if(t1.flash == 1){
 				state = T1_HH_HIGH;
-				t1.hit = 0;
+				t1.flash = 0;
 				count_int = 0;
 			}
 			break;
@@ -531,9 +531,9 @@ int T2_HH_tick(int state){
 		break;
 		
 		case T2_HH_Wait:
-		if(t2.hit == 1){
+		if(t2.flash == 1){
 			state = T2_HH_HIGH;
-			t2.hit = 0;
+			t2.flash = 0;
 			count_int = 0;
 		}
 		break;
