@@ -6,6 +6,7 @@
 #define MACRO_CANNON_WIDTH 10
 #define MACRO_CANNON_LENGTH 25
 #define MACRO_TANK_MOVE_RATE 5
+#define TANK_LOAD_TICKS 50
 
 #define MACRO_BULLET_SPEED 9
 #define MACRO_BULLET_HEIGHT 10
@@ -24,7 +25,7 @@
 #define VALID_POWERUP_TRIES 2
 
 #define INITIAL_HEALTH 100
-#define DEFAULT_RELOAD_TIME 5
+#define DEFAULT_RELOAD_TICKS 150
 #define DEFAULT_BULLET_STRENGTH 20 
 
 #define NORMAL_COLOR 0x0000
@@ -48,7 +49,7 @@ typedef struct _tank {
 	int bullet_width;
 	int bullet_strength;
 	int reload_time;
-	
+	int load_time;
 	int hit;
 	int flash;
 	int refresh;
@@ -121,7 +122,8 @@ void initTank(tank * t, int x, int y, char direction){
 	t->health = INITIAL_HEALTH;
 	t->tank_speed = MACRO_TANK_MOVE_RATE;
 	t->bullet_strength = DEFAULT_BULLET_STRENGTH;
-	t->reload_time = DEFAULT_RELOAD_TIME;
+	t->reload_time = DEFAULT_RELOAD_TICKS;
+	t->load_time = TANK_LOAD_TICKS;
 	t->tank_direction = direction;
 	t->flash = 0;
 	t->hit = 0;

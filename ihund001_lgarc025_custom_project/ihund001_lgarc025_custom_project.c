@@ -45,7 +45,7 @@ const unsigned short numTasks = NUM_TASKS;
 // Tank Input Handler Tasks States
 enum Left_Rotation_Input_Controller_States{LRIC_Start, LRIC_Wait, LRIC_Hold};
 enum Right_Rotation_Input_Controller_States{RRIC_Start, RRIC_Wait, RRIC_Hold};
-enum Shot_Input_Controller_States{SIC_Start, SIC_Wait, SIC_Sound_Off, SIC_Hold};
+enum Shot_Input_Controller_States{SIC_Start, SIC_Wait, SIC_Sound_Off, SIC_Load, SIC_Reload, SIC_Hold};
 enum Movement_Input_Controller_States{MIC_Start, MIC_Process};
 
 // Tank 1 Input Handlers
@@ -284,6 +284,9 @@ int T2_MIC_tick(int state){
 }
 
 int T1_SIC_tick(int state){
+	static int loads = 0;
+	static int count = 0;
+	
 	unsigned char us_pina = ~PINA;
 	unsigned char shoot = GetBit(us_pina, T1_SHOT_BIT);
 	
@@ -300,7 +303,27 @@ int T1_SIC_tick(int state){
 			break;
 		case SIC_Sound_Off:
 			output_pc = SetBit(output_pc, CANNON_BIT, 0);
-			state = SIC_Hold;
+			++loads;
+			if(loads == 3){
+				loads = 0;
+				state = SIC_Reload;
+			}
+			else
+				state = SIC_Load;
+			break;
+		case SIC_Reload:
+			++count;
+			if(count == t1.reload_time){
+				count = 0;
+				state = SIC_Load;
+			}
+			break;
+		case SIC_Load:
+			++count;
+			if(count == t1.load_time){
+				count = 0;
+				state = SIC_Hold;
+			}
 			break;
 		case SIC_Hold:
 			if(!shoot){
@@ -313,6 +336,9 @@ int T1_SIC_tick(int state){
 }
 
 int T2_SIC_tick(int state){
+	static int loads = 0;
+	static int count = 0;
+	
 	unsigned char us_pind = ~PIND;
 	unsigned char shoot = GetBit(us_pind, T2_SHOT_BIT);
 	
@@ -329,7 +355,27 @@ int T2_SIC_tick(int state){
 			break;
 		case SIC_Sound_Off:
 			output_pc = SetBit(output_pc, CANNON_BIT, 0);
-			state = SIC_Hold;
+			++loads;
+			if(loads == 3){
+				loads = 0;
+				state = SIC_Reload;
+			}
+			else
+				state = SIC_Load;
+			break;		
+		case SIC_Reload:
+			++count;
+			if(count == t1.reload_time){
+				count = 0;
+				state = SIC_Load;
+			}
+			break;
+		case SIC_Load:
+			++count;
+			if(count == t1.load_time){
+				count = 0;
+				state = SIC_Hold;
+			}
 			break;
 		case SIC_Hold:
 			if(!shoot){
