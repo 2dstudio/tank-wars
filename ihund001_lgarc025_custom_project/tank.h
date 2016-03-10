@@ -441,7 +441,7 @@ int shotHitTank(const bullet * s, tank * t1, tank * t2){
 	if(windowsCollide(&bullet_window,&t2_body_window) || windowsCollide(&bullet_window,&t2_cannon_window)){
 		t2->hit = 1;
 		t2->flash = 1;
-		t2->flash = HIT_COLOR;
+		t2->flash_color = HIT_COLOR;
 		t2->health -= s->bullet_strength;
 		return 1;
 	}
