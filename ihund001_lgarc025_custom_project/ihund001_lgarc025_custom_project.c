@@ -9,6 +9,7 @@
 #include <avr/interrupt.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "lib\HX8357_1284.h"
 #include "tank.h"
@@ -194,8 +195,6 @@ int main(void)
 	fillScreen(0xFFFF);
 	
 	Initialise_Game();
-	
-	game_over("T2 won");
 	
 	while(1)
 	{	
@@ -733,12 +732,18 @@ void kill_all_tasks(){
 }
 
 void game_over(char * output){
+	char t1_score[20];
+	char t2_score[20];
+	sprintf(t1_score, "T1: %d", t1.health);
+	sprintf(t2_score, "T2: %d", t2.health);
 	kill_all_tasks();
 	fillScreen(0xFFFF);
 	drawString(80, 80, output, 0X0000, 4);
 	drawString(80, 160, "Press 2", 0X0000, 4);
 	drawString(110, 200, "To", 0X0000, 4);
 	drawString(80, 240, "Restart", 0X0000, 4);
+	drawString(80, 280, t1_score , 0X0000, 4);
+	drawString(80, 320, t2_score , 0X0000, 4);
 }
 
 int GD_tick(int state){
