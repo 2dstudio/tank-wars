@@ -32,10 +32,12 @@
 #define T2_ROTATE_RIGHT_BIT 6
 #define T2_SHOT_BIT 0
 
+#define DEAD_STATE 99
 
-#define NUM_TASKS 12
+#define NUM_TASKS 13
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
+#define GAME_TASKS 12
 
 // Tank Input Handler Tasks States
 enum Left_Rotation_Input_Controller_States{LRIC_Start, LRIC_Wait, LRIC_Hold};
@@ -70,6 +72,12 @@ int PG_tick(int state);
 // Game Engine
 enum Game_Engine{GE_Start, GE_Process};
 int GE_tick(int state);
+
+
+// Game Decider
+enum GD_States{GD_Start, GD_Process};
+int GD_tick(int state);
+
 
 tank t1;
 tank t2;
@@ -171,6 +179,12 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &GE_tick;
+	++i;
+	tasks[i].state = GD_Start;
+	tasks[i].period = display_refresh_rate;
+	tasks[i].elapsedTime = display_refresh_rate;
+	tasks[i].TickFct = &GD_tick;
+	
 	
 	TimerFlag = 0;
 	TimerSet(TimePeriodGCD);
@@ -547,7 +561,7 @@ int GE_tick(int state){
 			// Move tanks
 			game_engine_move_tanks_helper();
 			
-			// Check if tank got power up
+			// Todo-Apply power up
 			detect_power_up_gain();
 	
 			// Redisplay Tanks if needed
@@ -713,4 +727,40 @@ void powerup_generator(){
 			}
 		}
 	}
+}
+
+void kill_all_tasks(){
+	for(int i=0; i<GAME_TASKS; ++i){
+		tasks[i].state = DEAD_STATE;
+	}
+}
+
+void game_over(const char * output){
+	kill_all_tasks();
+	fillScreen(0xFFFF);
+}
+
+int GD_tick(int state){
+	
+	switch(state){
+		case GD_Start:
+			state = GD_Process;
+			break;
+	}
+	
+	switch(state){
+		case GD_Process:
+			if(t1.health <= 0 && t2.health > 0){
+				game_over("T2 won");
+			}
+			else if(t2.health <= 0 && t1.health > 0){
+				game_over("T1 won");
+			}
+			else if(t1.health <= 0 && t2.health <=0){
+				game_over("Draw");
+			}
+			break;
+	}
+	
+	return state;
 }
