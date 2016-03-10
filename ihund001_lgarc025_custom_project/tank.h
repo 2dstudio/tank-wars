@@ -20,13 +20,15 @@
 #define POWERUP_WIDTH 20
 
 #define MAX_CONCURRENT_SHOTS 4
-#define MAX_CONCURRENT_POWERUPS 1
+#define MAX_CONCURRENT_POWERUPS 2
+#define VALID_POWERUP_TRIES 2
 
 #define INITIAL_HEALTH 5
 #define INITIAL_BULLET_COUNT 5 
 
 #define NORMAL_COLOR 0x0000
 #define HIT_COLOR 0xF800
+
 
 typedef struct _tank {
 	int x;
@@ -265,13 +267,13 @@ void getBulletWindow(const bullet *s, window * bullet_window){
 	initWindow(bullet_window, lower_x, lower_y, upper_x, upper_y);
 }
 
-void getPowerUpWindow(int x, int y, window * powerup_window){
+void getPowerUpWindow(const powerup *p, window *powerup_window){
 	int lower_x, lower_y, upper_x, upper_y;
 	
-	lower_x = x;
-	lower_y = y;
-	upper_x = x + POWERUP_WIDTH;
-	upper_y = y + POWERUP_WIDTH;
+	lower_x = p->x;
+	lower_y = p->y;
+	upper_x = p->x + POWERUP_WIDTH;
+	upper_y = p->y + POWERUP_WIDTH;
 	initWindow(powerup_window, lower_x, lower_y, upper_x, upper_y);
 }
 

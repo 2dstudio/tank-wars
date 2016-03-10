@@ -522,7 +522,8 @@ int PG_tick(int state){
 	
 	switch(state){
 		case PG_Process:
-			powerup_generator();
+			if(rand()%3 == 0)
+				powerup_generator();
 			powerup_cleaner();
 			break;
 	}
@@ -577,11 +578,10 @@ void refresh_tanks(){
 	}
 }
 
-int powerUpBoxCollides(int x, int y){
-	window bullet_window, t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
-	window powerup_window;
+int powerUpCollides(const powerup * p){
+	window powerup_window, bullet_window, t1_body_window, t1_cannon_window, t2_body_window, t2_cannon_window;
 	
-	getPowerUpWindow(x, y, &powerup_window);
+	getPowerUpWindow(p, &powerup_window);
 	
 	// Check if powerUp collides with a tank;
 	getTankBodyWindow(&t1, &t1_body_window);
@@ -607,40 +607,50 @@ int powerUpBoxCollides(int x, int y){
 	}
 	
 	//Check if powerup collides with another powerup
-	/*
 	for(int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
 		if(powerup_arr[i]!=NULL){
 			window powerup_win2;
-			
+			getPowerUpWindow(powerup_arr[i], &powerup_win2);
+			if(windowsCollide(&powerup_window, &powerup_win2)){
+				return 4;
+			}
 		}
-	}*/
+	}
 	
 	return 0;
 }
 
-int getEmptySpot(int *x, int *y){
-	*x = 100;
-	*y = 100;
-	if(powerUpBoxCollides(*x, *y))
-		return -1;
-	return 1;
-	// Check if collides and then change pos;
-};
-
-powerup* generatePowerUp(char type){
-	int x=0, y=0;
-	int status = getEmptySpot(&x,&y);
-	if(status == -1){
-		return NULL;
+powerup* generateRandomPowerUp(){
+	int x = rand()%(SCREEN_X_MAX - POWERUP_WIDTH);
+	int y = rand()%(SCREEN_Y_MAX - POWERUP_HEIGHT);
+	int tr = rand()%3;
+	char type;
+	switch(tr){
+		case 0:
+			type='H';
+			break;
+		case 1:
+			type='B';
+			break;
+		case 2:
+			type='I';
+			break;
+		default:
+			type='H';
 	}
 	powerup * p = malloc(sizeof(powerup));
-	initPowerUp(p, x, y, type );
+	initPowerUp(p, x, y, type);
 	return p;
 }
 
-powerup * generateRandomPowerUp(){
-	//int r = rand()%4;
-	return generatePowerUp('I');
+powerup * generateValidPowerUp(){
+	for(int i=0; i<VALID_POWERUP_TRIES; ++i){
+		powerup * p = generateRandomPowerUp();
+		if(!powerUpCollides(p))
+			return p;
+		free(p);
+	}
+	return NULL;
 }
 
 void powerup_cleaner(){
@@ -662,7 +672,7 @@ void powerup_generator(){
 	for (int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
 		if(powerup_arr[i]==NULL){
 			//generate_powerup_here
-			powerup_arr[i] = generateRandomPowerUp();
+			powerup_arr[i] = generateValidPowerUp();
 			if(powerup_arr[i]!=NULL){
 				printPowerUp(powerup_arr[i]);
 				return;
