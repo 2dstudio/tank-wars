@@ -65,18 +65,6 @@ int T2_Flasher_tick(int state);
 enum Game_Engine{GE_Start, GE_Process};
 int GE_tick(int state);
 
-// Shots Propagator
-enum Shot_Movement_Controller_States{SMC_Start, SMC_Process};
-int SMC_tick(int state);
-
-// Tank mover
-enum Tank_Movement_States{TM_Start, TM_Process};
-int TM_tick(int state);
-
-// Tank Displayer
-enum Tank_Display_Handler_States{TDH_Start, TDH_Process};
-int TDH_tick(int state);
-
 tank t1;
 tank t2;
 
@@ -91,6 +79,7 @@ int t1_controls[6];
 int t2_controls[6];
 
 bullet* shots_arr[MAX_CONCURRENT_SHOTS];
+powerup* powerup_arr[MAX_CONCURRENT_POWERUPS];
 
 // Helper functions
 void game_engine_move_tanks_helper();
