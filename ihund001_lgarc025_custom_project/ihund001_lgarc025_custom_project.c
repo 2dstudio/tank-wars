@@ -547,7 +547,7 @@ int GE_tick(int state){
 			// Move tanks
 			game_engine_move_tanks_helper();
 			
-			// Todo-Check if tank got power up
+			// Check if tank got power up
 			detect_power_up_gain();
 	
 			// Redisplay Tanks if needed
