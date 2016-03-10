@@ -32,7 +32,7 @@
 #define T2_SHOT_BIT 0
 
 
-#define NUM_TASKS 13
+#define NUM_TASKS 11
 task tasks[NUM_TASKS];
 const unsigned short numTasks = NUM_TASKS;
 
@@ -91,6 +91,10 @@ int t1_controls[6];
 int t2_controls[6];
 
 bullet* shots_arr[MAX_CONCURRENT_SHOTS];
+
+// Helper functions
+void game_engine_move_tanks_helper();
+void refresh_tanks();
 
 int main(void)
 {
@@ -161,21 +165,6 @@ int main(void)
 	tasks[i].period = display_refresh_rate;
 	tasks[i].elapsedTime = display_refresh_rate;
 	tasks[i].TickFct = &GE_tick;
-	++i;
-	tasks[i].state = TM_Start;
-	tasks[i].period = display_refresh_rate;
-	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &TM_tick;
-	++i;
-	tasks[i].state = SMC_Start;
-	tasks[i].period = display_refresh_rate;
-	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &SMC_tick;
-	++i;
-	tasks[i].state = TDH_Start;
-	tasks[i].period = display_refresh_rate;
-	tasks[i].elapsedTime = display_refresh_rate;
-	tasks[i].TickFct = &TDH_tick;
 	
 	TimerFlag = 0;
 	TimerSet(TimePeriodGCD);
@@ -206,7 +195,7 @@ int main(void)
 }
 
 void moveTankFromInput(tank * t1, tank* t2, int up, int down, int left, int right, int lr, int rr){
-	int moved = 0;
+	int moved = t1->moved;
 	if(up && !down)
 		moved |= moveTank(t1, t2, 0, t1->tank_speed);
 	else if(down && !up)
@@ -416,66 +405,6 @@ int T2_RRIC_tick(int state){
 	return state;
 }
 
-int SMC_tick(int state){
-	switch(state){
-		case SMC_Start:
-			state = SMC_Process;
-			break;
-	}
-	
-	switch(state){
-		case SMC_Process:
-			moveAllShots(shots_arr, &t1, &t2);
-			break;
-	}
-	
-	return state;
-}
-
-int TM_tick(int state){
-	
-	switch(state){
-		case TM_Start:
-			state = TM_Process;
-			break;
-	}
-	
-	switch(state){
-		case TM_Process:
-			moveTankFromInput(&t1, &t2, t1_controls[TANK_UP], t1_controls[TANK_DOWN], t1_controls[TANK_LEFT], t1_controls[TANK_RIGHT], t1_controls[TANK_LR], t1_controls[TANK_RR] );
-			t1_controls[TANK_LR] = 0;
-			t1_controls[TANK_RR] = 0;
-			moveTankFromInput(&t2, &t1, t2_controls[TANK_UP], t2_controls[TANK_DOWN], t2_controls[TANK_LEFT], t2_controls[TANK_RIGHT], t2_controls[TANK_LR], t2_controls[TANK_RR] );
-			t2_controls[TANK_LR] = 0;
-			t2_controls[TANK_RR] = 0;
-	}
-	
-	return state;
-}
-
-int TDH_tick(int state){
-	switch(state){
-		case TDH_Start:
-			state = TDH_Process;
-			break;
-	}
-	
-	switch(state){
-		case TDH_Process:
-			if(t1.moved){
-				printTank(&t1);
-				t1.moved = 0;
-			}
-			if(t2.moved){
-				printTank(&t2);
-				t2.moved = 0;
-			}
-			break;
-	}
-	
-	return state;
-}
-
 int T1_Flasher_tick(int state){
 	
 	static int flashes = 0;
@@ -529,14 +458,13 @@ int T1_Flasher_tick(int state){
 }
 
 int T2_Flasher_tick(int state){
-	
 	static int flashes = 0;
 	static int count_int = 0;
 	
 	switch(state){
 		case Flasher_Start:
-		state = Flasher_Wait;
-		break;
+			state = Flasher_Wait;
+			break;
 		
 		case Flasher_Wait:
 		if(t2.flash == 1){
@@ -578,4 +506,51 @@ int T2_Flasher_tick(int state){
 	}
 	
 	return state;
+}
+
+
+int GE_tick(int state){
+	switch(state){
+		case GE_Start:
+			state = GE_Process;
+			break;
+	}
+	
+	switch(state){
+		case GE_Process:
+			// Move bullets
+			moveAllShots(shots_arr, &t1, &t2);
+			
+			// Move tanks
+			game_engine_move_tanks_helper();
+			
+			// Todo-Check if tank got power up
+	
+			// Redisplay Tanks if needed
+			refresh_tanks();
+			
+			break;
+	}
+	
+	return state;
+}
+
+void game_engine_move_tanks_helper(){
+	moveTankFromInput(&t1, &t2, t1_controls[TANK_UP], t1_controls[TANK_DOWN], t1_controls[TANK_LEFT], t1_controls[TANK_RIGHT], t1_controls[TANK_LR], t1_controls[TANK_RR] );
+	t1_controls[TANK_LR] = 0;
+	t1_controls[TANK_RR] = 0;
+	moveTankFromInput(&t2, &t1, t2_controls[TANK_UP], t2_controls[TANK_DOWN], t2_controls[TANK_LEFT], t2_controls[TANK_RIGHT], t2_controls[TANK_LR], t2_controls[TANK_RR] );
+	t2_controls[TANK_LR] = 0;
+	t2_controls[TANK_RR] = 0;
+}
+
+void refresh_tanks(){
+	if(t1.moved){
+		printTank(&t1);
+		t1.moved = 0;
+	}
+	if(t2.moved){
+		printTank(&t2);
+		t2.moved = 0;
+	}
 }
