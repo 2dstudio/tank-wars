@@ -917,8 +917,8 @@ void Initialise_Game(){
 	memset(t2_controls, 0, 6* sizeof(int));
 		
 	
-	initTank(&t1, 100, 50, 'N');
-	initTank(&t2, 100, 400, 'S');
+	initTank(&t1, 100, 50, 'N', 1);
+	initTank(&t2, 100, 400, 'S', 2);
 	
 	printTank(&t1);
 	printTank(&t2);

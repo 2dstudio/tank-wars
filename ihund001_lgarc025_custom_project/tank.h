@@ -19,19 +19,33 @@
 #define MAX_CONCURRENT_POWERUPS 2
 #define VALID_POWERUP_TRIES 1
 
-// T1
+// Type 1
 #define TYPE1_TANK_LENGTH 40
 #define TYPE1_TANK_WIDTH 40
 #define TYPE1_CANNON_WIDTH 10
 #define TYPE1_CANNON_LENGTH 25
 #define TYPE1_TANK_MOVE_RATE 5
-#define TYPE1_TANK_LOAD_TICKS 50
-#define TYPE1_BULLET_SPEED 9
+#define TYPE1_TANK_LOAD_TICKS 25
+#define TYPE1_BULLET_SPEED 7
 #define TYPE1_BULLET_HEIGHT 10
 #define TYPE1_BULLET_WIDTH 10
 #define TYPE1_INITIAL_HEALTH 100
-#define TYPE1_RELOAD_TICKS 150
-#define TYPE1_BULLET_STRENGTH 20 
+#define TYPE1_RELOAD_TICKS 50
+#define TYPE1_BULLET_STRENGTH 25 
+
+// Type 2
+#define TYPE2_TANK_LENGTH 70
+#define TYPE2_TANK_WIDTH 70
+#define TYPE2_CANNON_WIDTH 20
+#define TYPE2_CANNON_LENGTH 40
+#define TYPE2_TANK_MOVE_RATE 3
+#define TYPE2_TANK_LOAD_TICKS 80
+#define TYPE2_BULLET_SPEED 9
+#define TYPE2_BULLET_HEIGHT 20
+#define TYPE2_BULLET_WIDTH 20
+#define TYPE2_INITIAL_HEALTH 180
+#define TYPE2_RELOAD_TICKS 240
+#define TYPE2_BULLET_STRENGTH 50
 
 typedef struct _tank {
 	int x;
@@ -112,22 +126,37 @@ void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
 	w->u_y = u_y;
 }
 
-void initTank(tank * t, int x, int y, char direction){
+void initTank(tank * t, int x, int y, char direction, char type){
 	t->x = x;
 	t->y = y;
 	
-	t->tank_length = TYPE1_TANK_LENGTH;
-	t->tank_width = TYPE1_TANK_WIDTH;
-	t->cannon_length = TYPE1_CANNON_LENGTH;
-	t->cannon_width = TYPE1_CANNON_WIDTH;
-	t->bullet_speed = TYPE1_BULLET_SPEED;
-	t->bullet_height = TYPE1_BULLET_HEIGHT;
-	t->bullet_width = TYPE1_BULLET_WIDTH;
-	t->health = TYPE1_INITIAL_HEALTH;
-	t->tank_speed = TYPE1_TANK_MOVE_RATE;
-	t->bullet_strength = TYPE1_BULLET_STRENGTH;
-	t->reload_time = TYPE1_RELOAD_TICKS;
-	t->load_time = TYPE1_TANK_LOAD_TICKS;
+	if(type == 1){
+		t->tank_length = TYPE1_TANK_LENGTH;
+		t->tank_width = TYPE1_TANK_WIDTH;
+		t->cannon_length = TYPE1_CANNON_LENGTH;
+		t->cannon_width = TYPE1_CANNON_WIDTH;
+		t->bullet_speed = TYPE1_BULLET_SPEED;
+		t->bullet_height = TYPE1_BULLET_HEIGHT;
+		t->bullet_width = TYPE1_BULLET_WIDTH;
+		t->health = TYPE1_INITIAL_HEALTH;
+		t->tank_speed = TYPE1_TANK_MOVE_RATE;
+		t->bullet_strength = TYPE1_BULLET_STRENGTH;
+		t->reload_time = TYPE1_RELOAD_TICKS;
+		t->load_time = TYPE1_TANK_LOAD_TICKS;
+	} else if (type == 2){
+		t->tank_length = TYPE2_TANK_LENGTH;
+		t->tank_width = TYPE2_TANK_WIDTH;
+		t->cannon_length = TYPE2_CANNON_LENGTH;
+		t->cannon_width = TYPE2_CANNON_WIDTH;
+		t->bullet_speed = TYPE2_BULLET_SPEED;
+		t->bullet_height = TYPE2_BULLET_HEIGHT;
+		t->bullet_width = TYPE2_BULLET_WIDTH;
+		t->health = TYPE2_INITIAL_HEALTH;
+		t->tank_speed = TYPE2_TANK_MOVE_RATE;
+		t->bullet_strength = TYPE2_BULLET_STRENGTH;
+		t->reload_time = TYPE2_RELOAD_TICKS;
+		t->load_time = TYPE2_TANK_LOAD_TICKS;
+	}
 	
 	t->tank_direction = direction;
 	t->flash = 0;
@@ -540,11 +569,11 @@ void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
 		*cannon_x = t->x + cannon_offset;
 		*cannon_y = t->y + t->tank_length + t->cannon_length;
 	} else if (t->tank_direction == 'E'){
-		*cannon_x = t->x - t->cannon_length - TYPE1_BULLET_HEIGHT;
+		*cannon_x = t->x - t->cannon_length - t->bullet_height;
 		*cannon_y = t->y + cannon_offset;
 	} else if (t->tank_direction == 'S'){
 		*cannon_x = t->x + cannon_offset;
-		*cannon_y = t->y - t->cannon_length - TYPE1_BULLET_HEIGHT;
+		*cannon_y = t->y - t->cannon_length - t->bullet_height;
 	} else {
 		*cannon_x = t->x + t->tank_length + t->cannon_length;
 		*cannon_y = t->y + cannon_offset;
