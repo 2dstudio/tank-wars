@@ -24,9 +24,9 @@
 #define TYPE1_TANK_WIDTH 40
 #define TYPE1_CANNON_WIDTH 10
 #define TYPE1_CANNON_LENGTH 25
-#define TYPE1_TANK_MOVE_RATE 5
+#define TYPE1_TANK_MOVE_RATE 7
 #define TYPE1_TANK_LOAD_TICKS 25
-#define TYPE1_BULLET_SPEED 7
+#define TYPE1_BULLET_SPEED 5
 #define TYPE1_BULLET_HEIGHT 10
 #define TYPE1_BULLET_WIDTH 10
 #define TYPE1_INITIAL_HEALTH 100
@@ -46,6 +46,20 @@
 #define TYPE2_INITIAL_HEALTH 180
 #define TYPE2_RELOAD_TICKS 240
 #define TYPE2_BULLET_STRENGTH 50
+
+// Type 3
+#define TYPE3_TANK_LENGTH 50
+#define TYPE3_TANK_WIDTH 50
+#define TYPE3_CANNON_WIDTH 12
+#define TYPE3_CANNON_LENGTH 30
+#define TYPE3_TANK_MOVE_RATE 5
+#define TYPE3_TANK_LOAD_TICKS 40
+#define TYPE3_BULLET_SPEED 7
+#define TYPE3_BULLET_HEIGHT 12
+#define TYPE3_BULLET_WIDTH 12
+#define TYPE3_INITIAL_HEALTH 130
+#define TYPE3_RELOAD_TICKS 120
+#define TYPE3_BULLET_STRENGTH 35
 
 typedef struct _tank {
 	int x;
@@ -156,7 +170,20 @@ void initTank(tank * t, int x, int y, char direction, char type){
 		t->bullet_strength = TYPE2_BULLET_STRENGTH;
 		t->reload_time = TYPE2_RELOAD_TICKS;
 		t->load_time = TYPE2_TANK_LOAD_TICKS;
-	}
+	} else if (type == 3){
+	t->tank_length = TYPE3_TANK_LENGTH;
+	t->tank_width = TYPE3_TANK_WIDTH;
+	t->cannon_length = TYPE3_CANNON_LENGTH;
+	t->cannon_width = TYPE3_CANNON_WIDTH;
+	t->bullet_speed = TYPE3_BULLET_SPEED;
+	t->bullet_height = TYPE3_BULLET_HEIGHT;
+	t->bullet_width = TYPE3_BULLET_WIDTH;
+	t->health = TYPE3_INITIAL_HEALTH;
+	t->tank_speed = TYPE3_TANK_MOVE_RATE;
+	t->bullet_strength = TYPE3_BULLET_STRENGTH;
+	t->reload_time = TYPE3_RELOAD_TICKS;
+	t->load_time = TYPE3_TANK_LOAD_TICKS;
+}
 	
 	t->tank_direction = direction;
 	t->flash = 0;
@@ -521,7 +548,8 @@ int moveSingleShot(bullet * s, tank * t1, tank *t2, powerup* powerup_arr[]){
 }
 
 void colorShot(const bullet * s, unsigned int color){
-	drawRect(s->x, s->y, s->bullet_width, s->bullet_height, color);
+	fillRect(s->x, s->y, s->bullet_width, s->bullet_height, color);
+	//drawRect(s->x, s->y, s->bullet_width, s->bullet_height, color);
 }
 
 void clearShot(bullet * s){
