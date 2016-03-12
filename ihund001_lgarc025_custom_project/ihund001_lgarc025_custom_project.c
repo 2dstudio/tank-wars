@@ -905,6 +905,12 @@ int GD_tick(int state){
 	unsigned char t1_type1 = GetBit(us_pina, T1_SHOT_BIT);
 	unsigned char t2_type1 = GetBit(us_pind, T2_SHOT_BIT);
 	
+	unsigned char t1_type2 = GetBit(us_pina, GAME_RESET_BIT);
+	unsigned char t2_type2 = GetBit(us_pind, GAME_RESET_BIT);
+	
+	unsigned char t1_type3 = GetBit(us_pina, T1_ROTATE_LEFT_BIT);
+	unsigned char t2_type3 = GetBit(us_pind, T2_ROTATE_RIGHT_BIT);
+	
 	switch(state){
 		case GD_Start:
 			main_Menu();
@@ -916,11 +922,27 @@ int GD_tick(int state){
 					t1_selected = 1;
 					tank1Selected();
 				}
+				else if(t1_type2){
+					t1_selected = 2;
+					tank1Selected();
+				}
+				else if(t1_type3){
+					t1_selected = 3;
+					tank1Selected();
+				}
 			}
 			if(t2_selected == 0){
 				if(t2_type1){
 					t2_selected = 1;
 					tank2Selected();				
+				}
+				else if(t2_type2){
+					t2_selected = 2;
+					tank2Selected();
+				}
+				else if(t2_type3){
+					t2_selected = 3;
+					tank2Selected();
 				}
 			}
 			if(t1_selected && t2_selected){
