@@ -869,10 +869,20 @@ void game_over(char * output){
 }
 
 void main_Menu(){
+	tank temp;
 	fillScreen(0xFFFF);
-	drawString(40, 80, "Welcome to", 0X0000, 4);
-	drawString(40, 120, "TankWars", 0X0000, 4);
+	drawString(40, 60, "Welcome to", 0X0000, 4);
+	drawString(40, 100, "TankWars", 0X0000, 4);
 	drawString(40, 280, "Select Tank", 0X0000, 4);
+	
+	initTank(&temp, 60, 160, 'N', 1);
+	printTank(&temp);
+	
+	initTank(&temp, 120, 160, 'N', 2);
+	printTank(&temp);
+	
+	initTank(&temp, 210, 160, 'N', 3);
+	printTank(&temp);
 }
 
 void tank1Selected(){
