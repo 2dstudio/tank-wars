@@ -80,7 +80,7 @@ int GE_tick(int state);
 
 
 // Game Decider
-enum GD_States{GD_Start, GD_Speculate, GD_Decided};
+enum GD_States{GD_Start, GD_Menu, GD_Speculate, GD_Decided};
 int GD_tick(int state);
 
 
@@ -109,9 +109,10 @@ void game_engine_move_tanks_helper();
 void refresh_tanks();
 void powerup_generator();
 void powerup_cleaner();
-void detect_power_up_gain();
-void Initialise_Game();
+void Initialise_Game(char, char);
 void game_over(char *);
+void kill_all_tasks();
+void detect_power_up_gain();
 
 int main(void)
 {
@@ -199,7 +200,10 @@ int main(void)
 	SPI_MasterInit();
 	displayInit();
 	
-	Initialise_Game();
+	kill_all_tasks();
+	tasks[12].state = tasks[12].startState;
+	
+	//Initialise_Game();
 	
 	while(1)
 	{	
@@ -864,16 +868,57 @@ void game_over(char * output){
 	drawString(80, 320, t2_score , 0X0000, 4);
 }
 
+void main_Menu(){
+	fillScreen(0xFFFF);
+	drawString(40, 80, "Welcome to", 0X0000, 4);
+	drawString(40, 120, "TankWars", 0X0000, 4);
+	drawString(40, 280, "Select Tank", 0X0000, 4);
+}
+
+void tank1Selected(){
+	drawString(80, 320, "T1 Ready", 0X0000, 4);
+}
+
+void tank2Selected(){
+	drawString(80, 360, "T2 Ready", 0X0000, 4);
+}
+
 int GD_tick(int state){
+	static int t1_selected = 0;
+	static int t2_selected = 0;
 	
 	unsigned char us_pina = ~PINA;
 	unsigned char us_pind = ~PIND;
 	unsigned char reset_t1 = GetBit(us_pina, GAME_RESET_BIT);
 	unsigned char reset_t2 = GetBit(us_pind, GAME_RESET_BIT);
 	
+	unsigned char t1_type1 = GetBit(us_pina, T1_SHOT_BIT);
+	unsigned char t2_type1 = GetBit(us_pind, T2_SHOT_BIT);
+	
 	switch(state){
 		case GD_Start:
-			state = GD_Speculate;
+			main_Menu();
+			state = GD_Menu;
+			break;
+		case GD_Menu:
+			if(t1_selected == 0){
+				if(t1_type1){
+					t1_selected = 1;
+					tank1Selected();
+				}
+			}
+			if(t2_selected == 0){
+				if(t2_type1){
+					t2_selected = 1;
+					tank2Selected();				
+				}
+			}
+			if(t1_selected && t2_selected){
+				Initialise_Game(t1_selected, t2_selected);
+				t1_selected = 0;
+				t2_selected = 0;
+				state = GD_Speculate;
+			}
 			break;
 		case GD_Speculate:
 			if(t1.health <= 0 && t2.health > 0){
@@ -891,7 +936,6 @@ int GD_tick(int state){
 			break;
 		case GD_Decided:
 			if(reset_t1 || reset_t2){
-				Initialise_Game();
 				state = GD_Start;
 			}
 	}
@@ -918,7 +962,7 @@ void freeArrays(){
 	}
 }
 
-void Initialise_Game(){
+void Initialise_Game(char t1_type, char t2_type){
 	output_pc = 0;
 	fillScreen(0xFFFF);
 	
@@ -935,8 +979,8 @@ void Initialise_Game(){
 	memset(t2_controls, 0, 6* sizeof(int));
 		
 	
-	initTank(&t1, 100, 50, 'N', 3);
-	initTank(&t2, 100, 400, 'S', 2);
+	initTank(&t1, 100, 50, 'N', t1_type);
+	initTank(&t2, 100, 400, 'S', t2_type);
 	
 	printTank(&t1);
 	printTank(&t2);
