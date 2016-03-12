@@ -899,12 +899,30 @@ int GD_tick(int state){
 	return state;
 }
 
+void freeArrays(){
+	
+	//Free power ups array
+	for (int i=0; i<MAX_CONCURRENT_POWERUPS; ++i){
+		if(powerup_arr[i]!=NULL){
+			free(powerup_arr[i]);
+			powerup_arr[i] = NULL;
+		}
+	}
+	
+	//Free Shots Array
+	for (int i=0; i<MAX_CONCURRENT_SHOTS; ++i){
+		if(shots_arr[i] != NULL){
+			free(shots_arr[i]);
+			shots_arr[i] = NULL;
+		}
+	}
+}
+
 void Initialise_Game(){
 	output_pc = 0;
 	fillScreen(0xFFFF);
 	
-	//To-Do shots_arr and powerup_arr cleanup here
-	
+	freeArrays();
 	
 	for(int i=0; i<NUM_TASKS; ++i){
 		tasks[i].state = tasks[i].startState;
