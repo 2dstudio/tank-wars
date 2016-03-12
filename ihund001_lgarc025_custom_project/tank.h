@@ -1,17 +1,6 @@
 #ifndef TANK_H
 #define TANK_H
 
-#define MACRO_TANK_LENGTH 40
-#define MACRO_TANK_WIDTH 40
-#define MACRO_CANNON_WIDTH 10
-#define MACRO_CANNON_LENGTH 25
-#define MACRO_TANK_MOVE_RATE 5
-#define TANK_LOAD_TICKS 50
-
-#define MACRO_BULLET_SPEED 9
-#define MACRO_BULLET_HEIGHT 10
-#define MACRO_BULLET_WIDTH 10
-
 #define SCREEN_X_MAX 320
 #define SCREEN_X_MIN 0
 #define SCREEN_Y_MAX 480
@@ -20,19 +9,29 @@
 #define POWERUP_HEIGHT 20
 #define POWERUP_WIDTH 20
 
-#define MAX_CONCURRENT_SHOTS 8
-#define MAX_CONCURRENT_POWERUPS 2
-#define VALID_POWERUP_TRIES 1
-
-#define INITIAL_HEALTH 100
-#define DEFAULT_RELOAD_TICKS 150
-#define DEFAULT_BULLET_STRENGTH 20 
-
 #define NORMAL_COLOR 0x0000
 #define HIT_COLOR 0xF800
 #define HEALTH_POWER_UP_COLOR 0x07E0
 #define SUPER_BULLET_POWER_UP_COLOR 0xF800
 #define SPEED_POWER_UP_COLOR 0xFFE0
+
+#define MAX_CONCURRENT_SHOTS 8
+#define MAX_CONCURRENT_POWERUPS 2
+#define VALID_POWERUP_TRIES 1
+
+// T1
+#define TYPE1_TANK_LENGTH 40
+#define TYPE1_TANK_WIDTH 40
+#define TYPE1_CANNON_WIDTH 10
+#define TYPE1_CANNON_LENGTH 25
+#define TYPE1_TANK_MOVE_RATE 5
+#define TYPE1_TANK_LOAD_TICKS 50
+#define TYPE1_BULLET_SPEED 9
+#define TYPE1_BULLET_HEIGHT 10
+#define TYPE1_BULLET_WIDTH 10
+#define TYPE1_INITIAL_HEALTH 100
+#define TYPE1_RELOAD_TICKS 150
+#define TYPE1_BULLET_STRENGTH 20 
 
 typedef struct _tank {
 	int x;
@@ -116,25 +115,26 @@ void initWindow(window * w, int l_x, int l_y, int u_x, int u_y){
 void initTank(tank * t, int x, int y, char direction){
 	t->x = x;
 	t->y = y;
-	t->tank_length = MACRO_TANK_LENGTH;
-	t->tank_width = MACRO_TANK_WIDTH;
-	t->cannon_length = MACRO_CANNON_LENGTH;
-	t->cannon_width = MACRO_CANNON_WIDTH;
-	t->bullet_speed = MACRO_BULLET_SPEED;
-	t->bullet_height = MACRO_BULLET_HEIGHT;
-	t->bullet_width = MACRO_BULLET_WIDTH;
-	t->health = INITIAL_HEALTH;
-	t->tank_speed = MACRO_TANK_MOVE_RATE;
-	t->bullet_strength = DEFAULT_BULLET_STRENGTH;
-	t->reload_time = DEFAULT_RELOAD_TICKS;
-	t->load_time = TANK_LOAD_TICKS;
+	
+	t->tank_length = TYPE1_TANK_LENGTH;
+	t->tank_width = TYPE1_TANK_WIDTH;
+	t->cannon_length = TYPE1_CANNON_LENGTH;
+	t->cannon_width = TYPE1_CANNON_WIDTH;
+	t->bullet_speed = TYPE1_BULLET_SPEED;
+	t->bullet_height = TYPE1_BULLET_HEIGHT;
+	t->bullet_width = TYPE1_BULLET_WIDTH;
+	t->health = TYPE1_INITIAL_HEALTH;
+	t->tank_speed = TYPE1_TANK_MOVE_RATE;
+	t->bullet_strength = TYPE1_BULLET_STRENGTH;
+	t->reload_time = TYPE1_RELOAD_TICKS;
+	t->load_time = TYPE1_TANK_LOAD_TICKS;
+	
 	t->tank_direction = direction;
 	t->flash = 0;
 	t->hit = 0;
 	t->refresh = 0;
 	t->color = NORMAL_COLOR;
 	t->flash_color = NORMAL_COLOR;
-	
 	t->fast_reload = 0;
 	t->super_speed = 0;
 }
@@ -540,11 +540,11 @@ void getCannonHead(const tank * t, int * cannon_x, int * cannon_y){
 		*cannon_x = t->x + cannon_offset;
 		*cannon_y = t->y + t->tank_length + t->cannon_length;
 	} else if (t->tank_direction == 'E'){
-		*cannon_x = t->x - t->cannon_length - MACRO_BULLET_HEIGHT;
+		*cannon_x = t->x - t->cannon_length - TYPE1_BULLET_HEIGHT;
 		*cannon_y = t->y + cannon_offset;
 	} else if (t->tank_direction == 'S'){
 		*cannon_x = t->x + cannon_offset;
-		*cannon_y = t->y - t->cannon_length - MACRO_BULLET_HEIGHT;
+		*cannon_y = t->y - t->cannon_length - TYPE1_BULLET_HEIGHT;
 	} else {
 		*cannon_x = t->x + t->tank_length + t->cannon_length;
 		*cannon_y = t->y + cannon_offset;
