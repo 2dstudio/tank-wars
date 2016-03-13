@@ -200,6 +200,7 @@ int main(void)
 	SPI_MasterInit();
 	displayInit();
 	
+	output_pc = 0;
 	kill_all_tasks();
 	tasks[12].state = tasks[12].startState;
 	
